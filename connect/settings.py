@@ -24,9 +24,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-mbj&ns)st^(x+uqyml)tqx2kv+y86oqn^0w56h7e7(17@jrhio'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Read DEBUG from env var (defaults to True for local dev, False on Vercel)
 
-ALLOWED_HOSTS = []
+DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
+
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '.vercel.app',
+    'connect-johnraphael1.vercel.app',  # we'll confirm the exact URL later
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.vercel.app',
+]
 
 
 # Application definition
@@ -99,6 +110,17 @@ WSGI_APPLICATION = 'connect.wsgi.application'
 import os
 
 if os.environ.get("TIDB_HOST"):
+    import tempfile
+
+    # Write CA cert from env var to a temp file (Vercel's filesystem is read-only except /tmp)
+    ca_path = os.environ.get("TIDB_CA_PATH")
+    ca_content = os.environ.get("TIDB_CA_CERT")
+    if ca_content and not ca_path:
+        tmp = tempfile.NamedTemporaryFile(mode='w', suffix='.pem', delete=False)
+        tmp.write(ca_content)
+        tmp.close()
+        ca_path = tmp.name
+
     DATABASES = {
         "default": {
             "ENGINE": "django_tidb",
@@ -108,7 +130,7 @@ if os.environ.get("TIDB_HOST"):
             "HOST": os.environ.get("TIDB_HOST"),
             "PORT": os.environ.get("TIDB_PORT", "4000"),
             "OPTIONS": {
-                "ssl": {"ca": os.environ.get("TIDB_CA_PATH")},
+                "ssl": {"ca": ca_path} if ca_path else {},
             },
         }
     }
@@ -204,7 +226,7 @@ else:
     MEDIA_URL = '/media/'
 
 
-    
+
 # CORS (For when you build the mobile app)
 CORS_ALLOW_ALL_ORIGINS = True
 
