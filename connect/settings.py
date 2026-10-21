@@ -111,7 +111,11 @@ WSGI_APPLICATION = 'connect.wsgi.application'
 
 import os
 
+# ============================================================
+# DATABASE
+# ============================================================
 if os.environ.get("TIDB_HOST"):
+    # Production: TiDB Cloud (via django-tidb + pymysql)
     DATABASES = {
         "default": {
             "ENGINE": "django_tidb",
@@ -121,12 +125,13 @@ if os.environ.get("TIDB_HOST"):
             "HOST": os.environ.get("TIDB_HOST"),
             "PORT": os.environ.get("TIDB_PORT", "4000"),
             "OPTIONS": {
-                "ssl_mode": "VERIFY_IDENTITY",
+                "ssl": {},
                 "charset": "utf8mb4",
             },
         }
     }
 else:
+    # Local development: MySQL on localhost
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.mysql",
@@ -137,7 +142,6 @@ else:
             "PORT": "3306",
         }
     }
-
 # Custom User Model (Crucial for Email/Phone login)
 AUTH_USER_MODEL = 'connect_app.User'
 
