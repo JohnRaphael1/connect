@@ -24,7 +24,6 @@ importlib_resources==7.1.0
 kiwisolver==1.5.0
 matplotlib==3.11.1
 matplotlib-inline==0.2.2
-mysqlclient==2.2.8
 narwhals==2.24.0
 numpy==2.4.1
 openpyxl==3.1.5
