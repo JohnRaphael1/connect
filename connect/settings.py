@@ -32,10 +32,12 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     '.vercel.app',
-    'connect-johnraphael1.vercel.app',  # we'll confirm the exact URL later
+    'connect-johnraphael1.vercel.app', 
+     'connect-app-navy.vercel.app', # we'll confirm the exact URL later
 ]
 
 CSRF_TRUSTED_ORIGINS = [
+    'https://connect-app-navy.vercel.app',
     'https://*.vercel.app',
 ]
 
