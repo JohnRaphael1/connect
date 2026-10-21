@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     # Third Party
     'rest_framework',
     'corsheaders',
-    
     # Local
     'connect_app',
     'cloudinary_storage',
@@ -165,15 +164,47 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 # Static & Media Files (Logo, Profile Pics, Posts)
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# STATIC_URL = '/static/'
+# STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-STATICFILES_DIRS = [BASE_DIR / 'static']
+# STATICFILES_DIRS = [BASE_DIR / 'static']
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# MEDIA_URL = '/media/'
 
+
+
+# ============================================================
+# STATIC & MEDIA FILES
+# ============================================================
+if DEBUG:
+    # Local development — serve from disk
+    STATIC_URL = '/static/'
+    STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+else:
+    # Production (Vercel) — use Cloudinary
+    CLOUDINARY_STORAGE = {
+        'CLOUD_NAME': os.environ.get("CLOUDINARY_CLOUD_NAME"),
+        'API_KEY': os.environ.get("CLOUDINARY_API_KEY"),
+        'API_SECRET': os.environ.get("CLOUDINARY_API_SECRET"),
+    }
+    STORAGES = {
+        "default": {
+            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "cloudinary_storage.storage.StaticHashedCloudinaryStorage",
+        },
+    }
+    STATIC_URL = '/static/'
+    MEDIA_URL = '/media/'
+
+
+    
 # CORS (For when you build the mobile app)
 CORS_ALLOW_ALL_ORIGINS = True
 
@@ -184,6 +215,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
+cloudinary.config(
+    cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.environ.get("CLOUDINARY_API_KEY"),
+    api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
+    secure=True,
+)
 
 
 # Production uses Cloudinary, development uses local files
