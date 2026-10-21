@@ -112,17 +112,6 @@ WSGI_APPLICATION = 'connect.wsgi.application'
 import os
 
 if os.environ.get("TIDB_HOST"):
-    import tempfile
-
-    # Write CA cert from env var to a temp file (Vercel's filesystem is read-only except /tmp)
-    ca_path = os.environ.get("TIDB_CA_PATH")
-    ca_content = os.environ.get("TIDB_CA_CERT")
-    if ca_content and not ca_path:
-        tmp = tempfile.NamedTemporaryFile(mode='w', suffix='.pem', delete=False)
-        tmp.write(ca_content)
-        tmp.close()
-        ca_path = tmp.name
-
     DATABASES = {
         "default": {
             "ENGINE": "django_tidb",
@@ -132,7 +121,8 @@ if os.environ.get("TIDB_HOST"):
             "HOST": os.environ.get("TIDB_HOST"),
             "PORT": os.environ.get("TIDB_PORT", "4000"),
             "OPTIONS": {
-                "ssl": {"ca": ca_path} if ca_path else {},
+                "ssl_mode": "VERIFY_IDENTITY",
+                "charset": "utf8mb4",
             },
         }
     }
@@ -147,7 +137,6 @@ else:
             "PORT": "3306",
         }
     }
-
 
 # Custom User Model (Crucial for Email/Phone login)
 AUTH_USER_MODEL = 'connect_app.User'
