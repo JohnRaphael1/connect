@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Notifications · Connect{% endblock %}
+
+{% block extra_css %}
+<style>
+    .notif-container {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 0 16px;
+    }
+
+    .notif-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    .notif-header h1 {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .notif-header h1 .count-badge {
+        background: var(--red);
+        color: #fff;
+        font-size: 14px;
+        padding: 2px 10px;
+        border-radius: 999px;
+        font-weight: 700;
+    }
+    .notif-header .sub {
+        font-size: 14px;
+        color: var(--text-muted);
+    }
+
+    /* Notifications List */
+    .notif-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .notif-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px;
+        border-radius: 16px;
+        text-decoration: none;
+        color: var(--text);
+        transition: background 0.2s, transform 0.15s;
+        position: relative;
+    }
+    .notif-item:hover {
+        background: var(--input-bg);
+        text-decoration: none;
+    }
+    .notif-item.unread {
+        background: rgba(230, 57, 70, 0.08);
+        border-left: 3px solid var(--red);
+    }
+    .notif-item.unread:hover {
+        background: rgba(230, 57, 70, 0.12);
+    }
+
+    .notif-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+        border: 2px solid var(--border-solid);
+    }
+    .notif-avatar-fallback {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--red);
+        color: #fff;
+        font-weight: 700;
+        font-size: 18px;
+    }
+
+    .notif-content {
+        flex: 1;
+        min-width: 0;
+    }
+    .notif-text {
+        font-size: 14.5px;
+        line-height: 1.4;
+        color: var(--text);
+    }
+    .notif-text strong {
+        font-weight: 700;
+    }
+    .notif-time {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 4px;
+    }
+
+    .notif-action-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .notif-action-icon.like { background: rgba(230, 57, 70, 0.15); color: var(--red); }
+    .notif-action-icon.comment { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+    .notif-action-icon.friend_req { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+    .notif-action-icon.friend_accept { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+    .notif-action-icon.message { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
+
+    .notif-unread-dot {
+        position: absolute;
+        top: 50%;
+        right: 16px;
+        transform: translateY(-50%);
+        width: 8px;
+        height: 8px;
+        background: var(--red);
+        border-radius: 50%;
+    }
+
+    /* Empty State */
+    .empty-state {
+        padding: 80px 20px;
+        text-align: center;
+        color: var(--text-muted);
+    }
+    .empty-state svg {
+        width: 72px;
+        height: 72px;
+        color: var(--border-solid);
+        margin: 0 auto 16px;
+    }
+    .empty-state h3 {
+        font-size: 18px;
+        color: var(--text);
+        margin-bottom: 8px;
+    }
+    .empty-state p { font-size: 14px; }
+
+    /* Section Divider */
+    .notif-divider {
+        text-align: center;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin: 24px 0 8px;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+        .notif-header h1 { font-size: 20px; }
+        .notif-avatar { width: 42px; height: 42px; }
+        .notif-text { font-size: 14px; }
+        .notif-item { padding: 12px; gap: 12px; }
+        .notif-action-icon { width: 36px; height: 36px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="notif-container">
+
+    <div class="notif-header">
+        <h1>
+            Notifications
+            {% if notifications|length > 0 %}
+                <span class="count-badge">{{ notifications|length }}</span>
+            {% endif %}
+        </h1>
+    </div>
+
+    {% if notifications %}
+        <div class="notif-list">
+            {% for n in notifications %}
+                <a href="{{ n.target_url }}" class="notif-item glass {% if n.id in unread_ids %}unread{% endif %}">
+                    
+                    <!-- Avatar -->
+                    {% if n.sender.profile_pic and n.sender.profile_pic.name != 'profiles/default.png' %}
+                        <img src="{{ n.sender.profile_pic.url }}" class="notif-avatar" alt="{{ n.sender.username }}">
+                    {% else %}
+                        <div class="notif-avatar notif-avatar-fallback">{{ n.sender.username|first|upper }}</div>
+                    {% endif %}
+
+                    <!-- Text -->
+                    <div class="notif-content">
+                        <div class="notif-text">
+                            <strong>{{ n.sender.full_name|default:n.sender.username }}</strong>
+                            {{ n.message }}
+                        </div>
+                        <div class="notif-time">{{ n.created_at|timesince }} ago</div>
+                    </div>
+
+                    <!-- Action Icon -->
+                    <div class="notif-action-icon {{ n.notif_type }}">
+                        {% if n.notif_type == 'like' %}
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                            </svg>
+                        {% elif n.notif_type == 'comment' %}
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                        {% elif n.notif_type == 'friend_req' %}
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                                <line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
+                            </svg>
+                        {% elif n.notif_type == 'friend_accept' %}
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22 4 12 14.01 9 11.01"/>
+                            </svg>
+                        {% elif n.notif_type == 'message' %}
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                        {% endif %}
+                    </div>
+
+                    {% if n.id in unread_ids %}
+                        <span class="notif-unread-dot"></span>
+                    {% endif %}
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="glass empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            <h3>No notifications yet</h3>
+            <p>When someone likes your post, comments, or sends a friend request, it'll show up here.</p>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

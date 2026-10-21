@@ -1,0 +1,821 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up · Connect</title>
+    <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --red: #e63946;
+            --red-light: #ff4d5a;
+            --red-glow: rgba(230, 57, 70, 0.35);
+            --bg: #f6f7fb;
+            --surface: rgba(255, 255, 255, 0.55);
+            --surface-strong: rgba(255, 255, 255, 0.8);
+            --border-glass: rgba(255, 255, 255, 0.7);
+            --border-solid: rgba(0, 0, 0, 0.06);
+            --text: #1f1f29;
+            --text-muted: #6b6b7b;
+            --input-bg: rgba(255, 255, 255, 0.75);
+            --input-border: rgba(0, 0, 0, 0.08);
+        }
+        [data-theme="dark"] {
+            --bg: #0a0a10;
+            --surface: rgba(25, 25, 35, 0.55);
+            --surface-strong: rgba(30, 30, 42, 0.8);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --border-solid: rgba(255, 255, 255, 0.06);
+            --text: #f2f2f7;
+            --text-muted: #a0a0b0;
+            --input-bg: rgba(0, 0, 0, 0.35);
+            --input-border: rgba(255, 255, 255, 0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            overflow-x: hidden;
+            transition: background 0.4s, color 0.4s;
+        }
+
+        /* ============== LEFT: brand panel ============== */
+        .brand-panel {
+            flex: 1.1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 30% 30%, rgba(230, 57, 70, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(230, 57, 70, 0.25) 0%, transparent 55%),
+                linear-gradient(135deg, #12060a 0%, #0a0a10 100%);
+            color: #fff;
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.55;
+            pointer-events: none;
+        }
+        .orb-1 {
+            width: 380px; height: 380px;
+            background: rgba(230, 57, 70, 0.7);
+            top: -100px; left: -100px;
+            animation: float1 12s ease-in-out infinite;
+        }
+        .orb-2 {
+            width: 300px; height: 300px;
+            background: rgba(255, 77, 90, 0.5);
+            bottom: -80px; right: -60px;
+            animation: float2 15s ease-in-out infinite;
+        }
+        @keyframes float1 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(40px, 50px); }
+        }
+        @keyframes float2 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-50px, -30px); }
+        }
+        .brand-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            animation: fadeUp 1s ease both;
+        }
+        .brand-logo {
+            width: 130px;
+            height: 130px;
+            object-fit: contain;
+            border-radius: 30%;
+            margin-bottom: 26px;
+            animation: spinSlow 20s linear infinite;
+            filter: drop-shadow(0 0 40px rgba(230, 57, 70, 0.7));
+        }
+        @keyframes spinSlow { to { transform: rotate(360deg); } }
+        .brand-title {
+            font-size: 58px;
+            font-weight: 900;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, #fff 0%, #ffd0d6 50%, #e63946 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+            margin-bottom: 14px;
+        }
+        .brand-subtitle {
+            font-size: 15px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.65);
+            font-weight: 500;
+        }
+        .brand-features {
+            margin-top: 50px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-width: 340px;
+        }
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            animation: fadeUp 0.8s ease both;
+        }
+        .feature:nth-child(1) { animation-delay: 0.3s; }
+        .feature:nth-child(2) { animation-delay: 0.5s; }
+        .feature:nth-child(3) { animation-delay: 0.7s; }
+        .feature-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--red), var(--red-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .feature span {
+            font-size: 14px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.85);
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ============== RIGHT: signup wizard ============== */
+        .form-panel {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            position: relative;
+            background: var(--bg);
+            transition: background 0.4s;
+            overflow-y: auto;
+        }
+        .form-panel::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 70% 30%, var(--red-glow) 0%, transparent 60%);
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .signup-card {
+            width: 100%;
+            max-width: 460px;
+            padding: 36px;
+            border-radius: 24px;
+            background: var(--surface);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid var(--border-glass);
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.08),
+                0 4px 16px rgba(230, 57, 70, 0.06);
+            animation: fadeUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+            position: relative;
+            z-index: 2;
+            margin: auto;
+        }
+
+        .mobile-logo {
+            display: none;
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            border-radius: 24%;
+            margin: 0 auto 16px;
+            animation: spinSlow 20s linear infinite;
+        }
+
+        .progress-track {
+            height: 5px;
+            border-radius: 999px;
+            background: var(--input-bg);
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 25%;
+            background: linear-gradient(90deg, var(--red), var(--red-light));
+            border-radius: 999px;
+            transition: width 0.35s ease;
+        }
+        .progress-label {
+            text-align: right;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .signup-header { margin-bottom: 20px; }
+        .signup-header h1 {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+        .signup-header p {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .error-banner {
+            padding: 12px 16px;
+            border-radius: 12px;
+            background: rgba(217, 43, 58, 0.12);
+            border: 1px solid rgba(217, 43, 58, 0.3);
+            color: #d92b3a;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 18px;
+            display: none;
+        }
+        .error-banner.show { display: block; animation: shake 0.4s; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        .step { display: none; }
+        .step.active { display: block; animation: fadeUp 0.35s ease both; }
+
+        .field { margin-bottom: 16px; }
+        .field-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            letter-spacing: 0.3px;
+        }
+        .field-input,
+        .field-select {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: 1px solid var(--input-border);
+            background: var(--input-bg);
+            color: var(--text);
+            font-size: 15px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+        .field-input:focus,
+        .field-select:focus {
+            border-color: var(--red);
+            box-shadow: 0 0 0 4px rgba(230, 57, 70, 0.12);
+        }
+
+        /* Contact toggle */
+        .contact-toggle {
+            display: flex;
+            background: var(--input-bg);
+            border-radius: 14px;
+            padding: 4px;
+            margin-bottom: 18px;
+            gap: 4px;
+            border: 1px solid var(--input-border);
+        }
+        .toggle-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 14px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        .toggle-btn.active {
+            background: var(--surface-strong);
+            color: var(--red);
+            box-shadow: 0 2px 8px rgba(230, 57, 70, 0.15);
+        }
+
+        .row-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-ghost {
+            padding: 14px 22px;
+            border-radius: 14px;
+            border: 1px solid var(--border-solid);
+            background: transparent;
+            color: var(--text);
+            font-weight: 600;
+            font-size: 15px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-ghost:hover { background: var(--surface-strong); }
+        .btn-primary {
+            flex: 1;
+            padding: 14px 22px;
+            border-radius: 14px;
+            border: none;
+            background: linear-gradient(135deg, var(--red) 0%, var(--red-light) 100%);
+            color: #fff;
+            font-weight: 700;
+            font-size: 15px;
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(230, 57, 70, 0.35);
+            transition: transform 0.15s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-primary:hover { box-shadow: 0 12px 32px rgba(230, 57, 70, 0.5); }
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .step-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 12px;
+        }
+
+        .policy-scroll {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--border-solid);
+            border-radius: 14px;
+            padding: 14px 16px;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+            color: var(--text-muted);
+            background: var(--input-bg);
+        }
+        .policy-scroll p { margin: 0 0 10px; }
+        .policy-scroll ul { margin: 8px 0; padding-left: 20px; }
+        .policy-scroll li { margin-bottom: 6px; }
+        .policy-scroll p:last-child { margin-bottom: 0; }
+
+        .policy-agree {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 14px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            color: var(--text);
+        }
+        .policy-agree input { margin-top: 3px; accent-color: var(--red); }
+
+        .login-cta {
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 20px;
+        }
+        .login-cta a {
+            color: var(--red);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .login-cta a:hover { text-decoration: underline; }
+
+        /* Theme toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid var(--border-glass);
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            transition: transform 0.15s, background 0.2s;
+        }
+        .theme-toggle:hover { transform: scale(1.08); }
+        .theme-toggle:active { transform: scale(0.94); }
+
+        /* ============== RESPONSIVE ============== */
+        @media (max-width: 900px) {
+            body { flex-direction: column; }
+            .brand-panel {
+                flex: none;
+                padding: 30px 20px;
+                min-height: 180px;
+            }
+            .brand-title { font-size: 38px; }
+            .brand-logo { width: 70px; height: 70px; margin-bottom: 12px; }
+            .brand-features { display: none; }
+            .form-panel { padding: 30px 20px; }
+        }
+        @media (max-width: 500px) {
+            .signup-card { padding: 28px 22px; }
+            .mobile-logo { display: block; }
+            .brand-panel { display: none; }
+            .form-panel { min-height: 100vh; }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <svg id="iconSun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <svg id="iconMoon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+    </button>
+
+    <!-- LEFT: brand panel -->
+    <div class="brand-panel">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="brand-content">
+            <img src="{% static 'images/logo.png' %}" alt="Connect" class="brand-logo">
+            <h1 class="brand-title">Join Connect</h1>
+            <p class="brand-subtitle">Let's Connect</p>
+
+            <div class="brand-features">
+                <div class="feature">
+                    <div class="feature-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </div>
+                    <span>Build your circle of friends</span>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+                        </svg>
+                    </div>
+                    <span>Share moments with people you care about</span>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                    </div>
+                    <span>Your privacy, your control</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: signup wizard -->
+    <div class="form-panel">
+        <div class="signup-card" id="signupCard">
+            <img src="{% static 'images/logo.png' %}" alt="Connect" class="mobile-logo">
+
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-label">
+                <span id="stepLabel">Step 1 of 4</span>
+            </div>
+
+            <div class="signup-header">
+                <h1>Create your account</h1>
+                <p>Join Connect in under a minute</p>
+            </div>
+
+            <div class="error-banner" id="errorBanner"></div>
+
+            <!-- STEP 1 -->
+            <div class="step active" data-step="1">
+                <div class="field">
+                    <label class="field-label" for="fullName">Full name</label>
+                    <input type="text" id="fullName" class="field-input" placeholder="e.g. Ada Obi" autocomplete="name">
+                </div>
+                <div class="row-actions">
+                    <button type="button" class="btn-primary" style="flex:1;" data-next>Next</button>
+                </div>
+            </div>
+
+            <!-- STEP 2 -->
+            <div class="step" data-step="2">
+                <div class="contact-toggle">
+                    <button type="button" class="toggle-btn active" data-mode="email">Email</button>
+                    <button type="button" class="toggle-btn" data-mode="phone">Phone</button>
+                </div>
+                <div class="field" id="emailGroup">
+                    <label class="field-label" for="email">Email address</label>
+                    <input type="email" id="email" class="field-input" placeholder="you@example.com" autocomplete="email">
+                </div>
+                <div class="field" id="phoneGroup" style="display:none;">
+                    <label class="field-label" for="phone">Phone number</label>
+                    <input type="tel" id="phone" class="field-input" placeholder="+234 801 234 5678" autocomplete="tel">
+                </div>
+                <div class="row-actions">
+                    <button type="button" class="btn-ghost" data-prev>Back</button>
+                    <button type="button" class="btn-primary" data-next>Next</button>
+                </div>
+            </div>
+
+            <!-- STEP 3 -->
+            <div class="step" data-step="3">
+                <div class="field">
+                    <label class="field-label" for="dob">Date of birth</label>
+                    <input type="date" id="dob" class="field-input" autocomplete="bday">
+                </div>
+                <div class="field">
+                    <label class="field-label" for="gender">Gender</label>
+                    <select id="gender" class="field-select">
+                        <option value="">Select…</option>
+                        <option value="M">Male</option>
+                        <option value="F">Female</option>
+                        <option value="O">Other</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label class="field-label" for="password">Password</label>
+                    <input type="password" id="password" class="field-input" placeholder="At least 8 characters" autocomplete="new-password">
+                </div>
+                <div class="row-actions">
+                    <button type="button" class="btn-ghost" data-prev>Back</button>
+                    <button type="button" class="btn-primary" data-next>Next</button>
+                </div>
+            </div>
+
+            <!-- STEP 4 -->
+            <div class="step" data-step="4">
+                <h2 class="step-title">Privacy Policy</h2>
+                <div class="policy-scroll">
+                    <p>By creating an account on <strong>Connect</strong>, you agree to the following:</p>
+                    <ul>
+                        <li>You will provide accurate information about yourself.</li>
+                        <li>You will not share your password with anyone.</li>
+                        <li>You will respect other users and will not post harmful content.</li>
+                        <li>You understand that your profile information (name, profile picture, posts) may be visible to others based on your privacy settings.</li>
+                        <li>You can delete your account and download your data at any time from Settings.</li>
+                    </ul>
+                    <p>We are committed to protecting your privacy. Your data will not be sold to third parties.</p>
+                </div>
+                <label class="policy-agree">
+                    <input type="checkbox" id="policyAgree">
+                    <span>I have read and agree to the Privacy Policy and Terms of Service.</span>
+                </label>
+                <div class="row-actions">
+                    <button type="button" class="btn-ghost" data-prev>Back</button>
+                    <button type="button" class="btn-primary" id="finishBtn" disabled>Finish Creating Account</button>
+                </div>
+            </div>
+
+            <p class="login-cta">
+                Already have an account? <a href="{% url 'login' %}">Log in</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // ===== THEME TOGGLE =====
+        (function () {
+            const root = document.documentElement;
+            const btn = document.getElementById('themeToggle');
+            const sun = document.getElementById('iconSun');
+            const moon = document.getElementById('iconMoon');
+            function apply(theme) {
+                root.setAttribute('data-theme', theme);
+                sun.style.display = theme === 'dark' ? 'none' : 'block';
+                moon.style.display = theme === 'dark' ? 'block' : 'none';
+            }
+            apply(localStorage.getItem('connect-theme') || 'light');
+            btn.addEventListener('click', () => {
+                const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                apply(next);
+                localStorage.setItem('connect-theme', next);
+            });
+        })();
+
+        // ===== SIGNUP WIZARD =====
+        (function () {
+            const state = {
+                full_name: '', email: '', phone: '', mode: 'email',
+                dob: '', gender: '', password: ''
+            };
+            let currentStep = 1;
+            const totalSteps = 4;
+
+            const card = document.getElementById('signupCard');
+            const steps = card.querySelectorAll('.step');
+            const progressFill = document.getElementById('progressFill');
+            const stepLabel = document.getElementById('stepLabel');
+            const errorBanner = document.getElementById('errorBanner');
+
+            function showStep(n) {
+                currentStep = n;
+                steps.forEach(s => s.classList.toggle('active', parseInt(s.dataset.step) === n));
+                progressFill.style.width = (n / totalSteps * 100) + '%';
+                stepLabel.textContent = `Step ${n} of ${totalSteps}`;
+                hideError();
+                const first = steps[n - 1].querySelector('input, select');
+                if (first) setTimeout(() => first.focus(), 100);
+            }
+            function showError(msg) {
+                errorBanner.textContent = msg;
+                errorBanner.classList.remove('show');
+                void errorBanner.offsetWidth;
+                errorBanner.classList.add('show');
+            }
+            function hideError() {
+                errorBanner.classList.remove('show');
+                errorBanner.textContent = '';
+            }
+
+            function validateStep(n) {
+                if (n === 1) {
+                    const v = document.getElementById('fullName').value.trim();
+                    if (!v) { showError('Please enter your full name.'); return false; }
+                    if (v.length < 2) { showError('Name is too short.'); return false; }
+                    state.full_name = v;
+                    return true;
+                }
+                if (n === 2) {
+                    if (state.mode === 'email') {
+                        const v = document.getElementById('email').value.trim();
+                        if (!v) { showError('Please enter your email address.'); return false; }
+                        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+                            showError('That doesn\u2019t look like a valid email.');
+                            return false;
+                        }
+                        state.email = v;
+                        state.phone = '';
+                    } else {
+                        const v = document.getElementById('phone').value.trim();
+                        if (!v) { showError('Please enter your phone number.'); return false; }
+                        if (v.replace(/\D/g, '').length < 7) {
+                            showError('That phone number looks too short.');
+                            return false;
+                        }
+                        state.phone = v;
+                        state.email = '';
+                    }
+                    return true;
+                }
+                if (n === 3) {
+                    const dob = document.getElementById('dob').value;
+                    if (!dob) { showError('Please enter your date of birth.'); return false; }
+                    const dobDate = new Date(dob);
+                    const today = new Date();
+                    let age = today.getFullYear() - dobDate.getFullYear();
+                    const m = today.getMonth() - dobDate.getMonth();
+                    if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) age--;
+                    if (age < 13) { showError('You must be at least 13 years old to create an account.'); return false; }
+                    if (age > 120) { showError('Please enter a valid date of birth.'); return false; }
+
+                    const gender = document.getElementById('gender').value;
+                    if (!gender) { showError('Please select your gender.'); return false; }
+
+                    const pw = document.getElementById('password').value;
+                    if (pw.length < 8) { showError('Password must be at least 8 characters long.'); return false; }
+
+                    state.dob = dob;
+                    state.gender = gender;
+                    state.password = pw;
+                    return true;
+                }
+                if (n === 4) {
+                    if (!document.getElementById('policyAgree').checked) {
+                        showError('You must accept the Privacy Policy to continue.');
+                        return false;
+                    }
+                    return true;
+                }
+                return true;
+            }
+
+            card.querySelectorAll('[data-next]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (validateStep(currentStep)) showStep(currentStep + 1);
+                });
+            });
+            card.querySelectorAll('[data-prev]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (currentStep > 1) showStep(currentStep - 1);
+                });
+            });
+
+            card.querySelectorAll('.toggle-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    card.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    state.mode = btn.dataset.mode;
+                    document.getElementById('emailGroup').style.display = state.mode === 'email' ? 'block' : 'none';
+                    document.getElementById('phoneGroup').style.display = state.mode === 'phone' ? 'block' : 'none';
+                });
+            });
+
+            const policyAgree = document.getElementById('policyAgree');
+            const finishBtn = document.getElementById('finishBtn');
+            policyAgree.addEventListener('change', () => {
+                finishBtn.disabled = !policyAgree.checked;
+            });
+
+            finishBtn.addEventListener('click', async () => {
+                if (!validateStep(4)) return;
+
+                finishBtn.disabled = true;
+                const originalText = finishBtn.textContent;
+                finishBtn.innerHTML = '<span class="spinner"></span> Creating account…';
+                hideError();
+
+                function getCookie(name) {
+                    const m = document.cookie.match(new RegExp('(^|; )' + name + '=([^;]+)'));
+                    return m ? decodeURIComponent(m[2]) : '';
+                }
+
+                try {
+                    const res = await fetch('{% url "signup_submit" %}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken'),
+                        },
+                        body: JSON.stringify({
+                            full_name: state.full_name,
+                            email: state.email,
+                            phone: state.phone,
+                            dob: state.dob,
+                            gender: state.gender,
+                            password: state.password,
+                        }),
+                    });
+
+                    const data = await res.json();
+
+                    if (!res.ok || !data.ok) {
+                        let msg = data.error;
+                        if (!msg && data.errors) msg = Object.values(data.errors)[0];
+                        showError(msg || 'Something went wrong. Please try again.');
+                        finishBtn.disabled = false;
+                        finishBtn.textContent = originalText;
+                        return;
+                    }
+
+                    window.location.href = data.redirect || '/';
+                } catch (err) {
+                    console.error(err);
+                    showError('Network error. Please check your connection and try again.');
+                    finishBtn.disabled = false;
+                    finishBtn.textContent = originalText;
+                }
+            });
+
+            showStep(1);
+        })();
+    </script>
+</body>
+</html>

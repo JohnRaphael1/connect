@@ -1,0 +1,31 @@
+{% load static %}
+<div class="friend-card glass"
+     data-name="{{ user.full_name|default:user.username|lower }}"
+     data-username="{{ user.username|lower }}">
+    
+    <a href="{% url 'profile' user.username %}" class="friend-avatar-wrap">
+        {% if user.profile_pic and user.profile_pic.name != 'profiles/default.png' %}
+            <img src="{{ user.profile_pic.url }}" class="friend-avatar" alt="{{ user.username }}">
+        {% else %}
+            <div class="friend-avatar friend-avatar-fallback">{{ user.username|first|upper }}</div>
+        {% endif %}
+        <div class="status-dot offline"></div>
+    </a>
+
+    <div class="friend-name">
+        {{ user.full_name|default:user.username }}
+    </div>
+    <p class="friend-handle">@{{ user.username }}</p>
+
+    <div class="friend-actions">
+        <button class="btn-unblock js-unblock-btn"
+                data-username="{{ user.username }}"
+                data-name="{{ user.full_name|default:user.username }}">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+            </svg>
+            Unblock
+        </button>
+    </div>
+</div>

@@ -1,0 +1,73 @@
+{% load static %}
+<div class="msg-row {% if msg.sender == request.user %}me{% else %}them{% endif %}" data-msg-id="{{ msg.id }}">
+    {% if msg.sender != request.user %}
+        {% if msg.sender.profile_pic and msg.sender.profile_pic.name != 'profiles/default.png' %}
+            <img src="{{ msg.sender.profile_pic.url }}" class="msg-avatar">
+        {% else %}
+            <div class="msg-avatar msg-avatar-fallback">{{ msg.sender.username|first|upper }}</div>
+        {% endif %}
+    {% endif %}
+    <div class="msg-bubble">
+        {% if msg.message_type == 'text' %}
+            <p>{{ msg.text }}</p>
+        {% elif msg.message_type == 'image' %}
+            {% if msg.attachment %}<img src="{{ msg.attachment.url }}" class="msg-media">{% endif %}
+            {% if msg.text %}<p>{{ msg.text }}</p>{% endif %}
+        {% elif msg.message_type == 'video' %}
+            {% if msg.attachment %}<video src="{{ msg.attachment.url }}" controls class="msg-media"></video>{% endif %}
+        {% elif msg.message_type == 'document' %}
+            {% if msg.attachment %}
+                <a href="{{ msg.attachment.url }}" target="_blank" class="msg-doc">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    <span>{{ msg.text|default:"Document" }}</span>
+                </a>
+            {% endif %}
+        {% elif msg.message_type == 'voice' %}
+            {% if msg.attachment %}<audio src="{{ msg.attachment.url }}" controls style="max-width:220px;"></audio>{% endif %}
+        {% elif msg.message_type == 'sticker' %}
+            {% if msg.attachment %}<img src="{{ msg.attachment.url }}" class="msg-sticker">{% endif %}
+        {% endif %}
+        <div class="msg-time">{{ msg.timestamp|date:"H:i" }}</div>
+    </div>
+</div>
+
+
+
+
+
+
+
+{% load static %}
+<div class="friend-card glass"
+     data-name="{{ friend.full_name|default:friend.username|lower }}"
+     data-username="{{ friend.username|lower }}">
+    
+    <a href="{% url 'profile' friend.username %}" class="friend-avatar-wrap">
+        {% if friend.profile_pic and friend.profile_pic.name != 'profiles/default.png' %}
+            <img src="{{ friend.profile_pic.url }}" class="friend-avatar" alt="{{ friend.username }}">
+        {% else %}
+            <div class="friend-avatar friend-avatar-fallback">{{ friend.username|first|upper }}</div>
+        {% endif %}
+        <div class="status-dot {% if friend.active_status %}online{% else %}offline{% endif %}"></div>
+    </a>
+
+    <a href="{% url 'profile' friend.username %}" class="friend-name">
+        {{ friend.full_name|default:friend.username }}
+        <svg class="verified-badge" viewBox="0 0 24 24"><path d="M12 2l2.4 4.8 5.3.8-3.8 3.7.9 5.3-4.8-2.5-4.8 2.5.9-5.3-3.8-3.7 5.3-.8L12 2z"/></svg>
+    </a>
+    <p class="friend-handle">@{{ friend.username }}</p>
+
+    <div class="friend-actions">
+        <a href="{% url 'profile' friend.username %}" class="btn-view-profile">Profile</a>
+        <button class="btn-unfriend js-unfriend-btn"
+                data-username="{{ friend.username }}"
+                data-name="{{ friend.full_name|default:friend.username }}"
+                title="Remove friend">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                <line x1="17" y1="11" x2="23" y2="11"/>
+            </svg>
+            Unfriend
+        </button>
+    </div>
+</div>

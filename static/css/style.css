@@ -1,0 +1,89 @@
+:root {
+    /* Light Mode (Default) */
+    --bg-color: #f4f4f9;
+    --text-color: #333333;
+    --glass-bg: rgba(255, 255, 255, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.6);
+    --primary-red: #e63946;
+    --primary-white: #ffffff;
+    --input-bg: rgba(255,255,255,0.7);
+}
+
+[data-theme="dark"] {
+    /* Dark Mode */
+    --bg-color: #1a1a1a;
+    --text-color: #f4f4f9;
+    --glass-bg: rgba(30, 30, 30, 0.5);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --primary-red: #ff4d5a;
+    --primary-white: #e0e0e0;
+    --input-bg: rgba(0,0,0,0.5);
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: background-color 0.3s, color 0.3s;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background-image: url('../images/bg-texture.png'); /* Optional animated red blur bg */
+    background-size: cover;
+}
+
+/* Glassmorphism Class */
+.glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    margin: 20px auto;
+    max-width: 500px;
+    transition: all 0.3s ease;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: var(--primary-red);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+    font-weight: bold;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(230, 57, 70, 0.4);
+}
+
+/* Inputs */
+.form-input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    background: var(--input-bg);
+    color: var(--text-color);
+    box-sizing: border-box;
+    outline: none;
+}
+.form-input:focus {
+    border-color: var(--primary-red);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .glass-card {
+        margin: 10px;
+        padding: 20px;
+    }
+}

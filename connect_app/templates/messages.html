@@ -1,0 +1,412 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Messages · Connect{% endblock %}
+
+{% block extra_css %}
+<style>
+    .msg-shell {
+        display: grid;
+        grid-template-columns: 340px 1fr;
+        height: calc(100vh - 92px);
+        border-radius: 20px;
+        overflow: hidden;
+        border: 1px solid var(--border-glass);
+        background: var(--surface);
+        backdrop-filter: blur(20px);
+    }
+    .msg-side {
+        border-right: 1px solid var(--border-solid);
+        display: flex; flex-direction: column;
+        background: var(--surface-solid);
+    }
+    .msg-side-head { padding: 16px; border-bottom: 1px solid var(--border-solid); }
+    .msg-side-head h2 {
+        font-size: 20px; font-weight: 800; margin-bottom: 12px;
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .new-chat-btn {
+        width: 36px; height: 36px; border-radius: 50%;
+        background: var(--red); color: #fff;
+        display: flex; align-items: center; justify-content: center;
+        border: none; cursor: pointer; transition: transform 0.15s;
+    }
+    .new-chat-btn:active { transform: scale(0.92); }
+    .search-chats { position: relative; display: flex; align-items: center; }
+    .search-chats svg { position: absolute; left: 12px; color: var(--text-muted); }
+    .search-chats input {
+        width: 100%; padding: 10px 12px 10px 38px;
+        border-radius: 999px; border: 1px solid var(--border-solid);
+        background: var(--input-bg); color: var(--text);
+        font-size: 13px; outline: none; font-family: inherit;
+    }
+    .search-chats input:focus { border-color: var(--red); }
+
+    .online-rail {
+        display: flex; gap: 12px; padding: 12px 16px;
+        overflow-x: auto; border-bottom: 1px solid var(--border-solid);
+        background: var(--input-bg);
+    }
+    .online-pill {
+        display: flex; flex-direction: column; align-items: center; gap: 4px;
+        text-decoration: none; flex-shrink: 0; cursor: pointer;
+    }
+    .online-pill img, .online-pill .avatar {
+        width: 48px; height: 48px; border-radius: 50%;
+        object-fit: cover; border: 2px solid #22c55e;
+    }
+    .online-pill .avatar { background: var(--red); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .online-pill span { font-size: 11px; color: var(--text-muted); max-width: 56px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .filter-tabs { display: flex; gap: 4px; padding: 8px 12px; border-bottom: 1px solid var(--border-solid); }
+    .filter-tab {
+        flex: 1; padding: 8px; border-radius: 10px; font-size: 12px; font-weight: 600;
+        background: transparent; color: var(--text-muted); border: none; cursor: pointer;
+    }
+    .filter-tab.active { background: var(--red); color: #fff; }
+
+    .chat-list { flex: 1; overflow-y: auto; padding: 8px; }
+    .chat-item {
+        display: flex; align-items: center; gap: 12px;
+        padding: 10px; border-radius: 12px; text-decoration: none; color: var(--text);
+        position: relative; transition: background 0.2s;
+    }
+    .chat-item:hover, .chat-item.active { background: var(--input-bg); }
+    .chat-item.unread .chat-name { font-weight: 800; }
+    .chat-item.unread::after {
+        content: ''; width: 8px; height: 8px; background: var(--red); border-radius: 50%;
+        position: absolute; top: 50%; right: 10px; transform: translateY(-50%);
+    }
+    .chat-avatar-wrap { position: relative; flex-shrink: 0; }
+    .chat-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
+    .chat-avatar-fallback {
+        display: flex; align-items: center; justify-content: center;
+        background: var(--red); color: #fff; font-weight: 700; font-size: 18px;
+    }
+    .chat-online-dot {
+        position: absolute; bottom: 0; right: 0; width: 12px; height: 12px;
+        background: #22c55e; border-radius: 50%; border: 2px solid var(--surface-solid);
+    }
+    .chat-info { flex: 1; min-width: 0; }
+    .chat-name { font-size: 14px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 4px; }
+    .chat-preview { font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; }
+
+    .empty-right {
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        padding: 40px; color: var(--text-muted); text-align: center;
+    }
+    .empty-right svg { width: 80px; height: 80px; color: var(--border-solid); margin-bottom: 16px; }
+    .empty-right h3 { font-size: 20px; color: var(--text); margin-bottom: 8px; }
+
+    /* ============ NEW CHAT MODAL ============ */
+    .modal-overlay {
+        position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(6px);
+        display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .new-chat-modal {
+        width: 100%; max-width: 480px; max-height: 80vh;
+        background: var(--surface-solid); border: 1px solid var(--border-glass);
+        border-radius: 24px; display: flex; flex-direction: column;
+        overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .modal-header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 20px 24px; border-bottom: 1px solid var(--border-solid);
+    }
+    .modal-header h3 { font-size: 18px; font-weight: 800; }
+    .modal-close {
+        width: 32px; height: 32px; border-radius: 50%; background: var(--input-bg);
+        color: var(--text-muted); display: flex; align-items: center; justify-content: center;
+        font-size: 20px; border: none; cursor: pointer;
+    }
+    .modal-body {
+        padding: 16px 20px; overflow-y: auto; flex: 1;
+        display: flex; flex-direction: column; gap: 8px;
+    }
+    .modal-search {
+        position: relative; display: flex; align-items: center;
+        padding: 0 20px 12px;
+    }
+    .modal-search svg { position: absolute; left: 32px; color: var(--text-muted); }
+    .modal-search input {
+        width: 100%; padding: 12px 16px 12px 44px; border-radius: 999px;
+        border: 1px solid var(--border-solid); background: var(--input-bg);
+        color: var(--text); font-size: 14px; outline: none; font-family: inherit;
+    }
+    .modal-search input:focus { border-color: var(--red); }
+
+    .friend-item {
+        display: flex; align-items: center; gap: 12px;
+        padding: 10px 12px; border-radius: 12px;
+        cursor: pointer; transition: background 0.15s; border: none;
+        background: transparent; text-align: left; width: 100%; color: var(--text);
+    }
+    .friend-item:hover { background: var(--input-bg); }
+    .friend-item-avatar {
+        width: 44px; height: 44px; border-radius: 50%;
+        object-fit: cover; flex-shrink: 0;
+        border: 2px solid var(--border-solid);
+    }
+    .friend-item-avatar-fallback {
+        display: flex; align-items: center; justify-content: center;
+        background: var(--red); color: #fff; font-weight: 700; font-size: 16px;
+    }
+    .friend-item-info { flex: 1; min-width: 0; }
+    .friend-item-name { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+    .friend-item-username { font-size: 12px; color: var(--text-muted); }
+    .friend-item-dot {
+        width: 10px; height: 10px; border-radius: 50%;
+        flex-shrink: 0;
+    }
+    .friend-item-dot.online { background: #22c55e; }
+    .friend-item-dot.offline { background: #6b7280; }
+
+    .modal-footer {
+        padding: 16px 20px; border-top: 1px solid var(--border-solid);
+        display: flex; gap: 10px;
+    }
+    .modal-btn {
+        flex: 1; padding: 12px; border-radius: 12px; font-weight: 700;
+        font-size: 14px; font-family: inherit; cursor: pointer; border: none;
+    }
+    .modal-btn-secondary {
+        background: var(--input-bg); color: var(--text); border: 1px solid var(--border-solid);
+    }
+    .modal-btn-primary { background: var(--red); color: #fff; box-shadow: 0 4px 15px rgba(230,57,70,0.3); }
+
+    .modal-empty { text-align: center; padding: 30px 20px; color: var(--text-muted); font-size: 14px; }
+
+    @media (max-width: 800px) {
+        .msg-shell { grid-template-columns: 1fr; height: calc(100vh - 76px); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="msg-shell">
+    <aside class="msg-side">
+        <div class="msg-side-head">
+            <h2>
+                Messages
+                <button class="new-chat-btn" id="newChatBtn" title="New chat">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+            </h2>
+            <div class="search-chats">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="chatSearch" placeholder="Search chats..." autocomplete="off">
+            </div>
+        </div>
+
+        {% if online_friends %}
+            <div class="online-rail">
+                {% for f in online_friends %}
+                    <div class="online-pill" data-username="{{ f.username }}" style="cursor:pointer;">
+                        {% if f.profile_pic and f.profile_pic.name != 'profiles/default.png' %}
+                            <img src="{{ f.profile_pic.url }}">
+                        {% else %}
+                            <div class="avatar">{{ f.username|first|upper }}</div>
+                        {% endif %}
+                        <span>{{ f.full_name|default:f.username }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all">All</button>
+            <button class="filter-tab" data-filter="unread">Unread</button>
+            <button class="filter-tab" data-filter="favourite">Favs</button>
+            <button class="filter-tab" data-filter="archived">Archived</button>
+        </div>
+
+        <div class="chat-list" id="chatList">
+            {% for c in chats %}
+                <a href="{% url 'chat_view' c.id %}" class="chat-item {% if c.unread %}unread{% endif %}" 
+                   data-name="{{ c.name|lower }}"
+                   data-unread="{{ c.unread|yesno:'1,0' }}"
+                   data-favourite="{{ c.is_favourite|yesno:'1,0' }}"
+                   data-archived="{{ c.is_archived|yesno:'1,0' }}">
+                    <div class="chat-avatar-wrap">
+                        {% if c.avatar_url %}
+                            <img src="{{ c.avatar_url }}" class="chat-avatar">
+                        {% else %}
+                            <div class="chat-avatar chat-avatar-fallback">{{ c.initial }}</div>
+                        {% endif %}
+                        {% if c.online %}<div class="chat-online-dot"></div>{% endif %}
+                    </div>
+                    <div class="chat-info">
+                        <div class="chat-name">{{ c.name }}</div>
+                        <div class="chat-preview">{{ c.last_message }}</div>
+                    </div>
+                </a>
+            {% empty %}
+                <p style="text-align:center; padding:40px 20px; color:var(--text-muted); font-size:14px;">
+                    No chats yet.<br>Tap the <strong>+</strong> to start one.
+                </p>
+            {% endfor %}
+        </div>
+    </aside>
+
+    <div class="empty-right">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <h3>Select a chat</h3>
+        <p>Choose a conversation from the left, or start a new one.</p>
+    </div>
+</div>
+
+<!-- ================= NEW CHAT MODAL ================= -->
+<div class="modal-overlay" id="newChatModal">
+    <div class="new-chat-modal">
+        <div class="modal-header">
+            <h3>New Chat</h3>
+            <button class="modal-close" onclick="closeNewChat()">&times;</button>
+        </div>
+
+        <div class="modal-search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="friendSearchInput" placeholder="Search your friends..." autocomplete="off">
+        </div>
+
+        <div class="modal-body" id="friendsList">
+            {% for f in friends_for_chat %}
+                <button class="friend-item js-start-chat" data-username="{{ f.username }}" data-name="{{ f.full_name|default:f.username|lower }}">
+                    {% if f.profile_pic and f.profile_pic.name != 'profiles/default.png' %}
+                        <img src="{{ f.profile_pic.url }}" class="friend-item-avatar">
+                    {% else %}
+                        <div class="friend-item-avatar friend-item-avatar-fallback">{{ f.username|first|upper }}</div>
+                    {% endif %}
+                    <div class="friend-item-info">
+                        <div class="friend-item-name">{{ f.full_name|default:f.username }}</div>
+                        <div class="friend-item-username">@{{ f.username }}</div>
+                    </div>
+                    <div class="friend-item-dot {% if f.active_status %}online{% else %}offline{% endif %}"></div>
+                </button>
+            {% empty %}
+                <div class="modal-empty">
+                    <p>You don't have any friends yet.</p>
+                    <p style="margin-top:8px;font-size:12px;">Add friends from their profile pages first.</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="modal-footer">
+            <button class="modal-btn modal-btn-secondary" id="openGroupBtn">Create Group</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const newChatModal = document.getElementById('newChatModal');
+    const friendSearchInput = document.getElementById('friendSearchInput');
+    const friendsList = document.getElementById('friendsList');
+
+    // Open / close
+    document.getElementById('newChatBtn').addEventListener('click', () => {
+        newChatModal.classList.add('open');
+        friendSearchInput.value = '';
+        filterFriends('');
+        setTimeout(() => friendSearchInput.focus(), 100);
+    });
+    function closeNewChat() {
+        newChatModal.classList.remove('open');
+    }
+    newChatModal.addEventListener('click', (e) => {
+        if (e.target === newChatModal) closeNewChat();
+    });
+
+    // Search filter
+    function filterFriends(q) {
+        const items = friendsList.querySelectorAll('.friend-item');
+        let any = false;
+        items.forEach(item => {
+            const name = item.dataset.name || '';
+            const username = item.dataset.username || '';
+            const match = name.includes(q) || username.includes(q);
+            item.style.display = match ? '' : 'none';
+            if (match) any = true;
+        });
+        let empty = friendsList.querySelector('.search-no-match');
+        if (!any && q !== '') {
+            if (!empty) {
+                empty = document.createElement('div');
+                empty.className = 'modal-empty search-no-match';
+                empty.innerHTML = '<p>No friends match your search.</p>';
+                friendsList.appendChild(empty);
+            }
+        } else if (empty) {
+            empty.remove();
+        }
+    }
+    friendSearchInput.addEventListener('input', () => {
+        filterFriends(friendSearchInput.value.trim().toLowerCase());
+    });
+
+    // Start chat
+    function startChat(username) {
+        const fd = new FormData();
+        fd.append('username', username);
+        fetch('/messages/new/', {
+            method: 'POST',
+            headers: {'X-CSRFToken': getCsrfToken()},
+            body: fd
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.ok) {
+                window.location.href = '/messages/' + data.chat_id + '/';
+            } else {
+                alert(data.error || 'Failed to open chat.');
+            }
+        });
+    }
+    friendsList.querySelectorAll('.js-start-chat').forEach(btn => {
+        btn.addEventListener('click', () => startChat(btn.dataset.username));
+    });
+
+    // Online rail click starts chat too
+    document.querySelectorAll('.online-pill').forEach(pill => {
+        pill.addEventListener('click', () => startChat(pill.dataset.username));
+    });
+
+    // Group creation placeholder — hook later
+    document.getElementById('openGroupBtn').addEventListener('click', () => {
+        alert('Group creation coming soon.');
+    });
+
+    // CSRF
+    function getCsrfToken() {
+        const meta = document.querySelector('meta[name="csrf-token"]');
+        if (meta && meta.content) return meta.content;
+        const m = document.cookie.match(/csrftoken=([^;]+)/);
+        return m ? m[1] : '';
+    }
+
+    // Chat list search + filter (unchanged)
+    const chatSearch = document.getElementById('chatSearch');
+    if (chatSearch) {
+        chatSearch.addEventListener('input', () => {
+            const q = chatSearch.value.toLowerCase();
+            document.querySelectorAll('.chat-item').forEach(item => {
+                const match = (item.dataset.name || '').includes(q);
+                item.style.display = match ? '' : 'none';
+            });
+        });
+    }
+    document.querySelectorAll('.filter-tab').forEach(t => {
+        t.addEventListener('click', () => {
+            document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+            t.classList.add('active');
+            const activeFilter = t.dataset.filter;
+            document.querySelectorAll('.chat-item').forEach(item => {
+                let show = true;
+                if (activeFilter === 'unread') show = item.dataset.unread === '1';
+                else if (activeFilter === 'favourite') show = item.dataset.favourite === '1';
+                else if (activeFilter === 'archived') show = item.dataset.archived === '1';
+                else show = item.dataset.archived !== '1';
+                item.style.display = show ? '' : 'none';
+            });
+        });
+    });
+</script>
+{% endblock %}

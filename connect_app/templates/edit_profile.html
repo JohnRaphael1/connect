@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile · Connect{% endblock %}
+
+{% block extra_css %}
+<style>
+    .edit-container { max-width: 700px; margin: 20px auto; padding: 0 16px; }
+    .edit-card { padding: 30px; }
+
+    .edit-header {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-solid);
+    }
+    .edit-header h1 { font-size: 22px; font-weight: 800; color: var(--text); }
+    .btn-back { color: var(--text-muted); display: flex; align-items: center; gap: 6px; font-weight: 600; }
+    .btn-back:hover { color: var(--text); }
+
+    /* Image Upload Previews */
+    .banner-upload-area {
+        position: relative; width: 100%; height: 160px; border-radius: 16px;
+        background: var(--input-bg); overflow: hidden; cursor: pointer;
+        border: 2px dashed var(--border-solid); display: flex; align-items: center; justify-content: center;
+        margin-bottom: 20px; transition: border-color 0.2s;
+    }
+    .banner-upload-area:hover { border-color: var(--red); }
+    .banner-upload-area img { width: 100%; height: 100%; object-fit: cover; }
+    .upload-label {
+        position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+        background: rgba(0,0,0,0.4); color: #fff; font-weight: 600; opacity: 0; transition: opacity 0.2s;
+    }
+    .banner-upload-area:hover .upload-label { opacity: 1; }
+
+    .avatar-upload-area {
+        position: relative; width: 110px; height: 110px; border-radius: 50%;
+        background: var(--input-bg); overflow: hidden; cursor: pointer;
+        border: 3px solid var(--surface-solid); box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        margin: -55px auto 20px; display: flex; align-items: center; justify-content: center;
+    }
+    .avatar-upload-area img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar-upload-area .upload-label { border-radius: 50%; flex-direction: column; gap: 4px; font-size: 12px; }
+
+    /* Form Inputs */
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
+    .form-input, .form-select {
+        width: 100%; padding: 14px 16px; border-radius: 12px;
+        border: 1px solid var(--border-solid); background: var(--input-bg);
+        color: var(--text); font-size: 15px; outline: none; font-family: inherit;
+    }
+    .form-input:focus, .form-select:focus { border-color: var(--red); box-shadow: 0 0 0 3px rgba(230,57,70,0.15); }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    /* Toggle Switch */
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; border-top: 1px solid var(--border-solid); border-bottom: 1px solid var(--border-solid); margin-bottom: 24px; }
+    .toggle-info h4 { font-size: 15px; font-weight: 600; color: var(--text); }
+    .toggle-info p { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+    .switch { position: relative; display: inline-block; width: 48px; height: 28px; flex-shrink: 0; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; inset: 0; background: var(--border-solid); border-radius: 999px; cursor: pointer; transition: background 0.2s; }
+    .slider::before { content: ''; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; background: #fff; border-radius: 50%; transition: transform 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+    .switch input:checked + .slider { background: var(--red); }
+    .switch input:checked + .slider::before { transform: translateX(20px); }
+
+    /* Actions */
+    .form-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }
+    .btn-save { background: var(--red); color: #fff; padding: 12px 32px; border-radius: 12px; font-weight: 700; font-size: 15px; box-shadow: 0 4px 15px rgba(230,57,70,0.3); }
+    .btn-cancel { color: var(--text-muted); padding: 12px 20px; font-weight: 600; }
+
+    @media (max-width: 600px) {
+        .edit-card { padding: 20px; }
+        .form-row { grid-template-columns: 1fr; }
+        .form-actions { flex-direction: column-reverse; }
+        .btn-save { width: 100%; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edit-container">
+    <form method="POST" enctype="multipart/form-data" class="glass edit-card">
+        {% csrf_token %}
+
+        <div class="edit-header">
+            <h1>Edit Profile</h1>
+            <a href="{% url 'profile' request.user.username %}" class="btn-back">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                Back
+            </a>
+        </div>
+
+        <!-- Banner Upload -->
+        <label class="banner-upload-area">
+            {% if request.user.banner and request.user.banner.name != 'banners/default.png' %}
+                <img id="bannerPreview" src="{{ request.user.banner.url }}">
+            {% else %}
+                <img id="bannerPreview" style="display:none;">
+            {% endif %}
+            <div class="upload-label">Click to change banner</div>
+            <input type="file" name="banner" id="bannerInput" accept="image/*" hidden>
+        </label>
+
+        <!-- Avatar Upload -->
+        <label class="avatar-upload-area">
+            {% if request.user.profile_pic and request.user.profile_pic.name != 'profiles/default.png' %}
+                <img id="avatarPreview" src="{{ request.user.profile_pic.url }}">
+                <div id="avatarFallback" class="avatar avatar-fallback" style="display:none; width:100%; height:100%; font-size:36px;">{{ request.user.username|first|upper }}</div>
+            {% else %}
+                <img id="avatarPreview" style="display:none;">
+                <div id="avatarFallback" class="avatar avatar-fallback" style="width:100%; height:100%; font-size:36px;">{{ request.user.username|first|upper }}</div>
+            {% endif %}
+            <div class="upload-label">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                Change
+            </div>
+            <input type="file" name="profile_pic" id="avatarInput" accept="image/*" hidden>
+        </label>
+
+        <!-- Form Fields -->
+        <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" name="full_name" class="form-input" value="{{ request.user.full_name|default:'' }}" required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-input" value="{{ request.user.email|default:'' }}" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Phone</label>
+                <input type="tel" name="phone" class="form-input" value="{{ request.user.phone|default:'' }}">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Date of Birth</label>
+                <input type="date" name="dob" class="form-input" value="{{ request.user.dob|date:'Y-m-d' }}">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Gender</label>
+                <select name="gender" class="form-select">
+                    <option value="M" {% if request.user.gender == 'M' %}selected{% endif %}>Male</option>
+                    <option value="F" {% if request.user.gender == 'F' %}selected{% endif %}>Female</option>
+                    <option value="O" {% if request.user.gender == 'O' %}selected{% endif %}>Other</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Privacy Toggle -->
+        <div class="toggle-row">
+            <div class="toggle-info">
+                <h4>Private Account</h4>
+                <p>Only approved followers can see your posts.</p>
+            </div>
+            <label class="switch">
+                <input type="checkbox" name="is_private" {% if request.user.is_private %}checked{% endif %}>
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="form-actions">
+            <a href="{% url 'profile' request.user.username %}" class="btn-cancel">Cancel</a>
+            <button type="submit" class="btn-save">Save Changes</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Preview Banner
+    document.getElementById('bannerInput').addEventListener('change', function(e) {
+        if (e.target.files && e.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const img = document.getElementById('bannerPreview');
+                img.src = ev.target.result;
+                img.style.display = 'block';
+            }
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    });
+
+    // Preview Avatar
+    document.getElementById('avatarInput').addEventListener('change', function(e) {
+        if (e.target.files && e.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const img = document.getElementById('avatarPreview');
+                img.src = ev.target.result;
+                img.style.display = 'block';
+                document.getElementById('avatarFallback').style.display = 'none';
+            }
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    });
+</script>
+{% endblock %}

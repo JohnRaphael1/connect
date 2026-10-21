@@ -1,0 +1,342 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Search · Connect{% endblock %}
+
+{% block extra_css %}
+<style>
+    .search-container {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 0 16px;
+    }
+
+    /* ========== Search Header ========== */
+    .search-header {
+        margin-bottom: 24px;
+    }
+    .search-header h1 {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--text);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .search-header h1 .count-badge {
+        background: var(--red);
+        color: #fff;
+        font-size: 14px;
+        padding: 2px 10px;
+        border-radius: 999px;
+        font-weight: 700;
+    }
+
+    .big-search {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+    .big-search svg {
+        position: absolute;
+        left: 18px;
+        color: var(--text-muted);
+        pointer-events: none;
+    }
+    .big-search input {
+        width: 100%;
+        padding: 16px 20px 16px 52px;
+        border-radius: 16px;
+        border: 1px solid var(--border-solid);
+        background: var(--input-bg);
+        color: var(--text);
+        font-size: 15px;
+        font-family: inherit;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .big-search input:focus {
+        border-color: var(--red);
+        box-shadow: 0 0 0 4px rgba(230,57,70,0.12);
+    }
+
+    /* ========== Results List ========== */
+    .results-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .user-result {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 16px;
+        border-radius: 16px;
+        transition: transform 0.15s, box-shadow 0.2s;
+    }
+    .user-result:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+    }
+
+    .user-result-avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+        border: 2px solid var(--border-solid);
+    }
+    .user-result-avatar-fallback {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--red);
+        color: #fff;
+        font-weight: 700;
+        font-size: 20px;
+    }
+
+    .user-result-info {
+        flex: 1;
+        min-width: 0;
+    }
+    .user-result-name {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .user-result-name:hover { color: var(--red); }
+    .user-result-name .verified-badge {
+        width: 14px;
+        height: 14px;
+        fill: var(--red);
+        flex-shrink: 0;
+    }
+    .user-result-username {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-top: 2px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .user-result-actions {
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+
+    .btn-action {
+        padding: 9px 16px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+        font-family: inherit;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .btn-action-primary {
+        background: var(--red);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(230,57,70,0.25);
+    }
+    .btn-action-primary:hover { box-shadow: 0 6px 18px rgba(230,57,70,0.4); }
+    .btn-action-secondary {
+        background: var(--input-bg);
+        color: var(--text);
+        border: 1px solid var(--border-solid);
+    }
+    .btn-action-secondary:hover { background: var(--border-solid); }
+    .btn-action-pending {
+        background: transparent;
+        color: var(--text-muted);
+        border: 1px solid var(--border-solid);
+        cursor: not-allowed;
+    }
+    .btn-action:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* ========== Empty / Hint ========== */
+    .empty-state {
+        padding: 60px 20px;
+        text-align: center;
+        color: var(--text-muted);
+    }
+    .empty-state svg {
+        width: 72px;
+        height: 72px;
+        color: var(--border-solid);
+        margin: 0 auto 16px;
+    }
+    .empty-state h3 {
+        font-size: 18px;
+        color: var(--text);
+        margin-bottom: 8px;
+    }
+    .empty-state p { font-size: 14px; }
+
+    .search-hint {
+        padding: 40px 20px;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 14px;
+    }
+    .search-hint svg {
+        width: 56px;
+        height: 56px;
+        color: var(--border-solid);
+        margin: 0 auto 16px;
+    }
+    .search-hint strong { color: var(--text); }
+
+    /* ========== Responsive ========== */
+    @media (max-width: 600px) {
+        .search-header h1 { font-size: 20px; }
+        .big-search input { padding: 14px 16px 14px 46px; font-size: 14px; }
+        .user-result { padding: 12px; gap: 12px; }
+        .user-result-avatar { width: 48px; height: 48px; }
+        .user-result-actions .btn-action span { display: none; } /* icons only on mobile */
+        .user-result-actions .btn-action { padding: 9px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="search-container">
+
+    <!-- Header -->
+    <div class="search-header">
+        <h1>
+            Search
+            {% if query and result_count > 0 %}
+                <span class="count-badge">{{ result_count }}</span>
+            {% endif %}
+        </h1>
+        <form class="big-search" method="get" action="{% url 'search' %}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" name="q" value="{{ query }}" placeholder="Search by name or username..." autocomplete="off" autofocus>
+        </form>
+    </div>
+
+    <!-- Results -->
+    {% if query %}
+        {% if results %}
+            <div class="results-list">
+                {% for r in results %}
+                    <div class="user-result glass">
+                        <a href="{% url 'profile' r.user.username %}">
+                            {% if r.user.profile_pic and r.user.profile_pic.name != 'profiles/default.png' %}
+                                <img src="{{ r.user.profile_pic.url }}" class="user-result-avatar" alt="{{ r.user.username }}">
+                            {% else %}
+                                <div class="user-result-avatar user-result-avatar-fallback">{{ r.user.username|first|upper }}</div>
+                            {% endif %}
+                        </a>
+                        <div class="user-result-info">
+                            <a href="{% url 'profile' r.user.username %}" class="user-result-name">
+                                {{ r.user.full_name|default:r.user.username }}
+                                <svg class="verified-badge" viewBox="0 0 24 24"><path d="M12 2l2.4 4.8 5.3.8-3.8 3.7.9 5.3-4.8-2.5-4.8 2.5.9-5.3-3.8-3.7 5.3-.8L12 2z"/></svg>
+                            </a>
+                            <div class="user-result-username">@{{ r.user.username }}</div>
+                        </div>
+                        <div class="user-result-actions">
+                            {% if r.status == 'friend' %}
+                                <a href="{% url 'profile' r.user.username %}" class="btn-action btn-action-secondary">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                    <span>Profile</span>
+                                </a>
+                            {% elif r.status == 'pending' %}
+                                <button class="btn-action btn-action-pending" disabled>
+                                    Pending
+                                </button>
+                            {% else %}
+                                <button class="btn-action btn-action-primary js-add-friend" data-username="{{ r.user.username }}">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                                    <span>Add</span>
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state glass">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/>
+                </svg>
+                <h3>No users found</h3>
+                <p>No one matches "<strong>{{ query }}</strong>".<br>Try a different name or username.</p>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="search-hint glass">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <p>Start typing to search for people by <strong>name</strong> or <strong>@username</strong>.</p>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // CSRF helper
+    function getCsrfToken() {
+        const meta = document.querySelector('meta[name="csrf-token"]');
+        if (meta && meta.content) return meta.content;
+        const m = document.cookie.match(/csrftoken=([^;]+)/);
+        return m ? m[1] : '';
+    }
+
+    // Add Friend buttons
+    document.querySelectorAll('.js-add-friend').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const username = btn.dataset.username;
+            const original = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span style="opacity:0.7;">...</span>';
+
+            try {
+                const fd = new FormData();
+                const res = await fetch('/friend-request/send/' + encodeURIComponent(username) + '/', {
+                    method: 'POST',
+                    headers: {'X-CSRFToken': getCsrfToken()},
+                });
+                const data = await res.json();
+                if (data.ok) {
+                    btn.className = 'btn-action btn-action-pending';
+                    btn.innerHTML = 'Pending';
+                    btn.disabled = true;
+                } else {
+                    alert(data.error || 'Failed to send request.');
+                    btn.innerHTML = original;
+                    btn.disabled = false;
+                }
+            } catch (e) {
+                console.error(e);
+                alert('Network error.');
+                btn.innerHTML = original;
+                btn.disabled = false;
+            }
+        });
+    });
+</script>
+{% endblock %}

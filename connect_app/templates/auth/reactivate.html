@@ -1,0 +1,84 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reactivate · Connect</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+    <style>
+        :root {
+            --red: #e63946;
+            --bg: #0a0a10;
+            --text: #fff;
+            --text-muted: #a0a0b0;
+            --surface: rgba(25, 25, 35, 0.85);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --input-bg: rgba(0, 0, 0, 0.4);
+            --input-border: rgba(255, 255, 255, 0.12);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at 50% 50%, #3a0d13 0%, #0a0a10 70%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--text);
+        }
+        .card {
+            width: 100%;
+            max-width: 420px;
+            padding: 36px 32px;
+            border-radius: 20px;
+            background: var(--surface);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--border-glass);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+        .card img { height: 60px; margin: 0 auto 20px; }
+        .card h1 { font-size: 22px; margin-bottom: 8px; }
+        .card p { font-size: 14px; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; }
+        .field { text-align: left; margin-bottom: 16px; }
+        .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text-muted); }
+        .field input {
+            width: 100%; padding: 12px 16px; border-radius: 12px;
+            border: 1px solid var(--input-border);
+            background: var(--input-bg); color: var(--text);
+            font-size: 15px; font-family: inherit; outline: none;
+        }
+        .field input:focus { border-color: var(--red); }
+        button {
+            width: 100%; padding: 14px; border-radius: 12px;
+            background: var(--red); color: #fff;
+            border: none; font-weight: 700; font-size: 15px;
+            cursor: pointer; font-family: inherit;
+            margin-top: 8px;
+        }
+        button:active { transform: scale(0.98); }
+        .msg { font-size: 13px; margin-top: 12px; padding: 10px; border-radius: 10px; }
+        .msg.error { background: rgba(217, 43, 58, 0.15); color: #ff8a94; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <img src="{% static 'images/logo.png' %}" alt="Connect">
+        <h1>Reactivate your account</h1>
+        <p>Your account @{{ pending_user.username }} is temporarily deactivated. Enter your password to reactivate and continue.</p>
+        <form method="post">
+            {% csrf_token %}
+            <div class="field">
+                <label>Password</label>
+                <input type="password" name="password" required autofocus>
+            </div>
+            <button type="submit">Reactivate account</button>
+            {% if messages %}
+                {% for m in messages %}<div class="msg error">{{ m }}</div>{% endfor %}
+            {% endif %}
+        </form>
+    </div>
+</body>
+</html>

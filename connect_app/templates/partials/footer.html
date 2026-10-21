@@ -1,0 +1,97 @@
+{% load static %}
+<footer class="footer">
+    <div class="footer-inner">
+        <span class="text-muted">&copy; {% now "Y" %} Connect. All rights reserved.</span>
+        <span class="footer-links">
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
+            <a href="{% url 'settings' %}">Settings</a>
+        </span>
+    </div>
+</footer>
+
+<style>
+    .footer {
+        margin-top: 40px;
+        padding: 20px 16px;
+        border-top: 1px solid var(--border-solid);
+    }
+    .footer-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        font-size: 13px;
+    }
+    .footer-links { display: flex; gap: 16px; }
+    .footer-links a { color: var(--text-muted); }
+    .footer-links a:hover { color: var(--red); }
+
+    @media (max-width: 600px) {
+        .footer-inner { justify-content: center; text-align: center; }
+    }
+</style>
+
+<!-- Global JS -->
+<script>
+    // Reusable helpers (attached globally)
+    window.Connect = {
+        // GET JSON
+        get: async (url) => {
+            const r = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            if (!r.ok) throw new Error(await r.text());
+            return r.json();
+        },
+        // POST JSON
+        post: async (url, data) => {
+            const r = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': Connect.csrf(),
+                },
+                body: JSON.stringify(data),
+            });
+            if (!r.ok) throw new Error(await r.text());
+            return r.json();
+        },
+        // POST FormData (for file uploads)
+        postForm: async (url, formData) => {
+            const r = await fetch(url, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': Connect.csrf() },
+                body: formData,
+            });
+            if (!r.ok) throw new Error(await r.text());
+            return r.json();
+        },
+        csrf: () => {
+            const m = document.cookie.match(/csrftoken=([^;]+)/);
+            return m ? m[1] : '';
+        },
+        // Simple debounce
+        debounce: (fn, ms = 300) => {
+            let t;
+            return (...args) => {
+                clearTimeout(t);
+                t = setTimeout(() => fn(...args), ms);
+            };
+        },
+        // Format relative time
+        timeAgo: (iso) => {
+            const s = Math.floor((Date.now() - new Date(iso)) / 1000);
+            if (s < 60) return 'just now';
+            if (s < 3600) return Math.floor(s / 60) + 'm ago';
+            if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+            if (s < 604800) return Math.floor(s / 86400) + 'd ago';
+            return new Date(iso).toLocaleDateString();
+        },
+    };
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

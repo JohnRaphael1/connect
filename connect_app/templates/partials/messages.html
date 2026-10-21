@@ -1,0 +1,71 @@
+{% if messages %}
+<div class="toast-container">
+    {% for message in messages %}
+        <div class="toast glass fade-in {{ message.tags }}">
+            <span class="toast-text">{{ message }}</span>
+            <button class="toast-close" aria-label="Close">&times;</button>
+        </div>
+    {% endfor %}
+</div>
+
+<style>
+    .toast-container {
+        position: fixed;
+        top: 90px;
+        right: 20px;
+        z-index: 200;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 360px;
+    }
+    .toast {
+        padding: 14px 16px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        font-size: 14px;
+        font-weight: 500;
+        animation: slideInRight 0.3s ease both;
+    }
+    .toast.success { border-left: 4px solid #16a34a; }
+    .toast.error   { border-left: 4px solid #d92b3a; }
+    .toast.info    { border-left: 4px solid #2563eb; }
+    .toast.warning { border-left: 4px solid #f59e0b; }
+
+    .toast-close {
+        background: transparent;
+        border: none;
+        font-size: 22px;
+        line-height: 1;
+        color: var(--text-muted);
+        padding: 0 4px;
+    }
+    .toast-close:hover { color: var(--text); }
+
+    @keyframes slideInRight {
+        from { opacity: 0; transform: translateX(30px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    @media (max-width: 600px) {
+        .toast-container { left: 12px; right: 12px; max-width: none; top: 80px; }
+    }
+</style>
+
+<script>
+    // Auto-dismiss after 5 seconds; close button dismisses immediately
+    document.querySelectorAll('.toast').forEach(toast => {
+        const close = toast.querySelector('.toast-close');
+        close.addEventListener('click', () => toast.remove());
+        setTimeout(() => {
+            toast.style.transition = 'opacity 0.3s, transform 0.3s';
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(30px)';
+            setTimeout(() => toast.remove(), 300);
+        }, 5000);
+    });
+</script>
+{% endif %}

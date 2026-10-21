@@ -1,0 +1,26 @@
+{% load static %}
+<div class="cm-item">
+    <!-- Clickable Avatar -->
+    <a href="{% url 'profile' comment.user.username %}" class="cm-avatar-link">
+        {% if comment.user.profile_pic and comment.user.profile_pic.name != 'profiles/default.png' %}
+            <img src="{{ comment.user.profile_pic.url }}" alt="{{ comment.user.username }}" class="cm-avatar-img">
+        {% else %}
+            <div class="cm-avatar-fallback">{{ comment.user.username|first|upper }}</div>
+        {% endif %}
+    </a>
+    
+    <!-- Content -->
+    <div class="cm-body">
+        <!-- Clickable Username + Text inline -->
+        <div class="cm-text-wrapper">
+            <a href="{% url 'profile' comment.user.username %}" class="cm-username">{{ comment.user.username }}</a>
+            <span class="cm-text">{{ comment.text }}</span>
+        </div>
+        
+        <!-- Timestamp & Actions -->
+        <div class="cm-meta">
+            <span>{{ comment.created_at|timesince }} ago</span>
+            <button class="cm-reply-btn" type="button">Reply</button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,570 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{% block title %}Connect{% endblock %}</title>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* ================= THEME TOKENS ================= */
+        :root {
+            --red: #e63946;
+            --red-light: #ff4d5a;
+            --bg: #f6f7fb;
+            --bg-glow-1: rgba(255, 224, 227, 0.6);
+            --bg-glow-2: rgba(255, 217, 221, 0.4);
+            --surface: rgba(255, 255, 255, 0.7);
+            --surface-solid: #ffffff;
+            --border-glass: rgba(255, 255, 255, 0.9);
+            --border-solid: rgba(0, 0, 0, 0.05);
+            --text: #1f1f29;
+            --text-muted: #6b6b7b;
+            --input-bg: rgba(0, 0, 0, 0.04);
+            --shadow: 0 8px 32px rgba(0,0,0,0.05);
+        }
+        [data-theme="dark"] {
+            --bg: #050000;
+            --bg-glow-1: rgba(200, 20, 30, 0.4);
+            --bg-glow-2: rgba(120, 0, 10, 0.5);
+            --surface: rgba(20, 5, 5, 0.6);
+            --surface-solid: #120505;
+            --border-glass: rgba(255, 50, 50, 0.15);
+            --border-solid: rgba(255, 255, 255, 0.08);
+            --text: #ffffff;
+            --text-muted: #a0a0b0;
+            --input-bg: rgba(0, 0, 0, 0.5);
+            --shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+
+        /* ================= RESET ================= */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(circle at 10% 10%, var(--bg-glow-1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 90%, var(--bg-glow-2) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(20,0,0,1) 0%, transparent 100%);
+            background-attachment: fixed;
+            color: var(--text);
+            transition: background 0.3s, color 0.3s;
+            overflow-x: hidden;
+        }
+        a { color: var(--red); text-decoration: none; }
+        img { max-width: 100%; display: block; }
+        button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+        .glass {
+            background: var(--surface);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        /* ================= NAVBAR ================= */
+        .navbar-wrapper {
+            position: sticky; top: 0; z-index: 100; padding: 16px 24px;
+            display: flex; justify-content: center;
+        }
+        .navbar {
+            width: 100%; max-width: 900px; display: flex; align-items: center; gap: 16px;
+            padding: 8px 16px; border-radius: 999px;
+        }
+        .search-form { flex: 1; position: relative; display: flex; align-items: center; }
+        .search-form svg { position: absolute; left: 16px; color: var(--text-muted); }
+        .search-input {
+            width: 100%; padding: 12px 16px 12px 48px; border-radius: 999px;
+            border: 1px solid var(--border-solid); background: var(--input-bg);
+            color: var(--text); font-size: 14px; outline: none;
+        }
+        .search-input:focus { border-color: var(--red); }
+
+        .nav-icons { display: flex; align-items: center; gap: 4px; }
+        .icon-btn {
+            position: relative; width: 44px; height: 44px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text); transition: background 0.2s;
+        }
+        .icon-btn:hover { background: var(--input-bg); color: var(--red); }
+
+        .badge {
+            position: absolute; top: 6px; right: 6px; background: var(--red); color: #fff;
+            font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 999px;
+            border: 2px solid var(--surface-solid); line-height: 1;
+        }
+        .badge-dot {
+            position: absolute; top: 8px; right: 8px; width: 10px; height: 10px;
+            background: var(--red); border-radius: 50%; border: 2px solid var(--surface-solid);
+        }
+
+        .user-menu { position: relative; margin-left: 4px; }
+        .avatar-btn {
+            display: flex; align-items: center; gap: 6px; padding: 4px 8px 4px 4px;
+            border-radius: 999px; border: 1px solid var(--border-solid);
+            transition: background 0.2s;
+        }
+        .avatar-btn:hover { background: var(--input-bg); }
+        .avatar {
+            width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
+            border: 2px solid var(--border-solid);
+        }
+        .avatar-fallback {
+            display: flex; align-items: center; justify-content: center;
+            background: var(--red); color: #fff; font-weight: 700;
+        }
+        .dropdown {
+            position: absolute; top: calc(100% + 12px); right: 0; width: 240px;
+            max-width: calc(100vw - 32px);
+            padding: 8px; background: var(--surface-solid); border: 1px solid var(--border-glass);
+            border-radius: 16px; box-shadow: var(--shadow);
+            opacity: 0; transform: translateY(-10px); pointer-events: none; transition: all 0.2s ease;
+        }
+        .dropdown.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .drop-item {
+            display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+            border-radius: 10px; color: var(--text); font-size: 14px; font-weight: 500;
+        }
+        .drop-item:hover { background: var(--input-bg); color: var(--red); text-decoration: none; }
+
+        .mobile-search-btn { display: none; }
+
+        /* ================= APP LAYOUT ================= */
+        .app-layout {
+            max-width: 1400px; margin: 0 auto; padding: 0 24px 40px;
+            display: grid; grid-template-columns: 260px minmax(0, 1fr) 320px;
+            gap: 24px; align-items: start;
+        }
+
+        /* ================= SIDEBAR ================= */
+        .sidebar {
+            position: sticky; top: 100px; padding: 24px 16px;
+            display: flex; flex-direction: column; gap: 8px; height: calc(100vh - 120px);
+        }
+        .sidebar-logo {
+            display: flex; align-items: center; gap: 12px; padding: 0 12px 24px;
+            font-size: 24px; font-weight: 800; color: var(--text);
+        }
+        .sidebar-logo img { height: 40px; }
+        .nav-item {
+            display: flex; align-items: center; gap: 16px; padding: 14px 20px; border-radius: 16px;
+            color: var(--text-muted); font-weight: 600; font-size: 15px; transition: all 0.2s;
+            position: relative;
+        }
+        .nav-item:hover { background: var(--input-bg); color: var(--text); text-decoration: none; }
+        .nav-item.active {
+            background: linear-gradient(90deg, var(--red) 0%, rgba(230,57,70,0.6) 100%);
+            color: #fff; box-shadow: 0 4px 20px rgba(230,57,70,0.4);
+        }
+        .nav-item.active svg { color: #fff; }
+        .nav-item svg { width: 22px; height: 22px; }
+        .nav-badge {
+            margin-left: auto; background: var(--red); color: #fff; font-size: 12px;
+            font-weight: 700; padding: 2px 8px; border-radius: 999px;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto; padding: 16px 12px 0; border-top: 1px solid var(--border-solid);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .theme-switch {
+            display: flex; align-items: center; gap: 8px;
+            background: var(--input-bg); padding: 6px; border-radius: 999px;
+        }
+        .theme-switch svg { width: 16px; height: 16px; color: var(--text-muted); }
+        .toggle-track {
+            width: 44px; height: 24px; background: var(--border-solid);
+            border-radius: 999px; position: relative; cursor: pointer;
+        }
+        .toggle-thumb {
+            position: absolute; top: 3px; left: 3px; width: 18px; height: 18px;
+            background: var(--red); border-radius: 50%; transition: transform 0.3s;
+        }
+        [data-theme="dark"] .toggle-thumb { transform: translateX(20px); background: #fff; }
+
+        /* ================= RIGHT PANEL ================= */
+        .right-panel { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 100px; }
+        .panel-section { padding: 20px; }
+        .panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+        .panel-title { font-size: 16px; font-weight: 700; color: var(--text); }
+        .panel-link { font-size: 13px; color: var(--red); font-weight: 600; }
+
+        .profile-widget { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+        .profile-widget img, .profile-widget .avatar { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; }
+        .profile-widget-info h4 { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+        .profile-widget-info p { font-size: 13px; color: var(--text-muted); }
+
+        .profile-stats {
+            display: flex; justify-content: space-between; background: var(--input-bg);
+            border-radius: 16px; padding: 16px; text-align: center;
+        }
+        .stat-box h5 { font-size: 16px; font-weight: 800; color: var(--text); }
+        .stat-box p { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+        .friends-row { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 4px; }
+        .friend-online { position: relative; width: 48px; height: 48px; flex-shrink: 0; }
+        .friend-online img, .friend-online .avatar { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .online-dot {
+            position: absolute; bottom: 0; right: 0; width: 12px; height: 12px;
+            background: #22c55e; border: 2px solid var(--surface-solid); border-radius: 50%;
+        }
+
+        .req-item { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+        .req-item img, .req-item .avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
+        .req-info { flex: 1; }
+        .req-info h4 { font-size: 14px; font-weight: 700; color: var(--text); }
+        .req-info p { font-size: 12px; color: var(--text-muted); }
+        .req-actions { display: flex; gap: 8px; margin-top: 8px; }
+        .btn-accept { background: var(--red); color: #fff; padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 12px; }
+        .btn-reject { background: transparent; border: 1px solid var(--border-solid); color: var(--text); padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 12px; }
+
+        /* ================= RESPONSIVE ================= */
+        @media (max-width: 1100px) {
+            .app-layout { grid-template-columns: 80px 1fr; gap: 16px; }
+            .right-panel { display: none; }
+            .sidebar-logo span, .nav-item span, .nav-badge, .sidebar-bottom { display: none; }
+            .sidebar { padding: 20px 8px; align-items: center; }
+            .nav-item { padding: 14px; justify-content: center; }
+            .nav-item.active { border-radius: 50%; }
+            .navbar { max-width: 100%; }
+        }
+        @media (max-width: 768px) {
+            body { padding-bottom: 80px; }
+            .navbar-wrapper { padding: 10px 12px; }
+            .navbar { padding: 6px 12px; border-radius: 16px; gap: 8px; }
+            .search-form { display: none; }
+            .mobile-search-btn { display: flex; }
+            .icon-btn { width: 38px; height: 38px; }
+            .avatar { width: 32px; height: 32px; }
+            .app-layout { display: block; padding: 0 12px 20px; }
+            .app-main { padding-top: 10px; }
+
+            .sidebar {
+                position: fixed; bottom: 0; left: 0; right: 0; top: auto;
+                height: 64px; width: 100%; flex-direction: row;
+                padding: 0 16px; border-radius: 20px 20px 0 0;
+                background: var(--surface-solid); border-top: 1px solid var(--border-glass);
+                border-left: none; border-right: none; border-bottom: none;
+                justify-content: space-between; align-items: center;
+                z-index: 1000; box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+            }
+            .sidebar-logo, .sidebar-bottom { display: none; }
+            .nav-item { padding: 10px; border-radius: 50%; flex: 1; justify-content: center; margin: 0 4px; }
+            .nav-item.active { background: transparent; box-shadow: none; color: var(--red); }
+            .nav-item.active svg { fill: var(--red); stroke: var(--red); }
+            .nav-item svg { width: 24px; height: 24px; }
+            .nav-item.desktop-only { display: none; }
+            .dropdown { right: 0; width: max-content; min-width: 220px; max-width: calc(100vw - 24px); }
+        }
+
+
+
+
+
+                /* ================= SHARED POST CARD STYLES ================= */
+        .post-card { padding: 20px; margin-bottom: 20px; }
+        .post-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+        .post-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-solid); }
+        .post-author { flex: 1; }
+        .post-author h3 { font-size: 15px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 6px; }
+        .verified-badge { width: 16px; height: 16px; fill: var(--red); }
+        .post-meta { font-size: 13px; color: var(--text-muted); display: flex; gap: 8px; align-items: center; margin-top: 2px;}
+        .post-text { font-size: 15px; line-height: 1.5; color: var(--text); margin-bottom: 16px; white-space: pre-wrap; word-wrap: break-word; }
+        
+        .post-media { position: relative; border-radius: 16px; overflow: hidden; margin-bottom: 16px; }
+        .post-media img, .post-media video { width: 100%; display: block; max-height: 500px; object-fit: cover; }
+        .play-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); }
+        .play-overlay svg { width: 60px; height: 60px; fill: rgba(255,255,255,0.8); backdrop-filter: blur(4px); border-radius: 50%; }
+
+        .post-footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border-solid); padding-top: 16px; }
+        .post-stats { display: flex; gap: 20px; color: var(--text-muted); font-size: 14px; font-weight: 600; }
+        .stat { display: flex; align-items: center; gap: 8px; cursor: pointer; transition: color 0.2s; }
+        .stat:hover { color: var(--text); }
+        .stat.liked { color: var(--red); }
+        .stat svg { width: 20px; height: 20px; }
+        .stat.liked svg { fill: var(--red); stroke: var(--red); }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                /* ================= COMMENT MODAL (Global) ================= */
+        .comment-modal-overlay {
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px);
+            z-index: 1000; display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+            padding: 20px;
+        }
+        .comment-modal-overlay.open { opacity: 1; pointer-events: auto; }
+
+        .comment-modal {
+            width: 100%; max-width: 600px; height: 80vh; max-height: 700px;
+            background: var(--surface); backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid var(--border-glass); border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; overflow: hidden;
+            transform: scale(0.95) translateY(20px); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .comment-modal-overlay.open .comment-modal { transform: scale(1) translateY(0); }
+
+        .cm-header {
+            padding: 20px; border-bottom: 1px solid var(--border-solid);
+            display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+        }
+        .cm-title { font-size: 18px; font-weight: 800; color: var(--text); }
+        .cm-close {
+            width: 36px; height: 36px; border-radius: 50%; background: var(--input-bg);
+            color: var(--text-muted); display: flex; align-items: center; justify-content: center;
+            font-size: 24px; line-height: 1; transition: background 0.2s, color 0.2s;
+        }
+        .cm-close:hover { background: var(--red); color: #fff; }
+
+        .cm-post-preview {
+            padding: 16px 20px; border-bottom: 1px solid var(--border-solid);
+            display: flex; gap: 12px; flex-shrink: 0; background: var(--input-bg);
+        }
+        .cm-post-preview img, .cm-post-preview .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .cm-preview-content { flex: 1; }
+        .cm-preview-author { font-size: 14px; font-weight: 700; color: var(--text); }
+        .cm-preview-text { font-size: 14px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
+
+        .cm-list {
+            flex: 1; overflow-y: auto; padding: 20px;
+            display: flex; flex-direction: column; gap: 20px;
+        }
+        .cm-empty { text-align: center; color: var(--text-muted); padding: 40px 0; font-size: 14px; }
+
+        .cm-item { display: flex; gap: 12px; }
+        .cm-avatar-link { flex-shrink: 0; display: block; }
+        .cm-avatar-img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-solid); }
+        .cm-avatar-fallback { width: 36px; height: 36px; border-radius: 50%; background: var(--red); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+        .cm-body { flex: 1; min-width: 0; }
+        .cm-text-wrapper { font-size: 14px; line-height: 1.5; color: var(--text); word-wrap: break-word; }
+        .cm-username { font-weight: 700; color: var(--text); text-decoration: none; margin-right: 6px; }
+        .cm-username:hover { color: var(--red); text-decoration: none; }
+        .cm-text { color: var(--text); }
+        .cm-meta { margin-top: 4px; display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--text-muted); }
+        .cm-reply-btn { font-size: 12px; font-weight: 600; color: var(--text-muted); transition: color 0.2s; }
+        .cm-reply-btn:hover { color: var(--text); }
+
+        .cm-input-area {
+            padding: 16px 20px; border-top: 1px solid var(--border-solid);
+            display: flex; gap: 12px; align-items: center; flex-shrink: 0; background: var(--surface);
+        }
+        .cm-input-area input {
+            flex: 1; padding: 14px 20px; border-radius: 999px;
+            border: 1px solid var(--border-solid); background: var(--input-bg);
+            color: var(--text); outline: none; font-family: inherit; font-size: 14px;
+        }
+        .cm-input-area input:focus { border-color: var(--red); box-shadow: 0 0 0 3px rgba(230,57,70,0.15); }
+        .cm-input-area button {
+            background: var(--red); color: #fff; font-weight: 700; padding: 12px 24px;
+            border-radius: 999px; transition: transform 0.15s;
+        }
+        .cm-input-area button:active { transform: scale(0.95); }
+        .cm-input-area button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Mobile - Modal slides from bottom */
+        @media (max-width: 768px) {
+            .comment-modal-overlay { padding: 0; align-items: flex-end; }
+            .comment-modal { 
+                height: 90vh; max-height: 90vh; border-radius: 24px 24px 0 0; 
+                transform: translateY(100%); 
+            }
+            .comment-modal-overlay.open .comment-modal { transform: translateY(0); }
+            .cm-header { padding: 16px; border-radius: 24px 24px 0 0; }
+            .cm-list { padding: 16px; }
+            .cm-input-area { padding: 12px 16px 24px; }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+    <div class="navbar-wrapper">
+        <header class="navbar glass">
+            <form class="search-form" action="{% url 'search' %}" method="get">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" name="q" placeholder="Search people by name..." class="search-input" value="{{ request.GET.q }}">
+            </form>
+
+            <div class="nav-icons">
+                <a href="{% url 'search' %}" class="icon-btn mobile-search-btn">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </a>
+
+                <a href="{% url 'notifications' %}" class="icon-btn">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    {% if unread_notifs > 0 %}<span class="badge">{{ unread_notifs }}</span>{% endif %}
+                </a>
+
+                <a href="{% url 'messages' %}" class="icon-btn" title="Messages">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    {% if unread_messages > 0 %}<span class="badge">{{ unread_messages }}</span>{% endif %}
+                </a>
+
+                <div class="user-menu" id="userMenu">
+                    <button class="avatar-btn" id="avatarBtn">
+                        {% if request.user.profile_pic and request.user.profile_pic.name != 'profiles/default.png' %}
+                            <img src="{{ request.user.profile_pic.url }}" class="avatar">
+                        {% else %}
+                            <div class="avatar avatar-fallback">{{ request.user.username|first|upper }}</div>
+                        {% endif %}
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="dropdown" id="dropdownMenu">
+                        <a href="{% url 'profile' request.user.username %}" class="drop-item">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> My Profile
+                        </a>
+                        <a href="{% url 'settings' %}" class="drop-item">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Settings
+                        </a>
+                        <a href="{% url 'logout' %}" class="drop-item" style="color: var(--red);">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Log out
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+    </div>
+
+    <!-- ================= APP LAYOUT ================= -->
+    <div class="app-layout">
+        <aside class="sidebar glass">
+            <div class="sidebar-logo">
+                <img src="{% static 'images/logo.png' %}" alt="Logo"> <span>Connect</span>
+            </div>
+            <a href="{% url 'home' %}" class="nav-item {% if nav_active == 'home' %}active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <span>Home</span>
+                {% if has_new_posts %}<span class="badge-dot" style="position:absolute; right:20px; top:20px; border-color:var(--surface);"></span>{% endif %}
+            </a>
+            <a href="{% url 'add_post' %}" class="nav-item {% if nav_active == 'add_post' %}active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>Add Post</span>
+            </a>
+            <a href="{% url 'profile' request.user.username %}" class="nav-item {% if nav_active == 'profile' %}active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>Profile</span>
+            </a>
+            <a href="{% url 'friends' %}" class="nav-item {% if nav_active == 'friends' %}active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <span>Friends</span>
+            </a>
+            <a href="{% url 'friend_requests' %}" class="nav-item {% if nav_active == 'requests' %}active{% endif %}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                <span>Requests</span>
+                {% if pending_requests|length > 0 %}<span class="nav-badge">{{ pending_requests|length }}</span>{% endif %}
+            </a>
+
+            <div class="sidebar-bottom">
+                <div class="theme-switch">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                    <div class="toggle-track" id="themeToggle"><div class="toggle-thumb"></div></div>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                </div>
+            </div>
+        </aside>
+
+        <main class="app-main">
+            {% block content %}{% endblock %}
+        </main>
+
+        {% if request.resolver_match.url_name == 'home' %}
+        <aside class="right-panel">
+            <div class="panel-section glass">
+                <div class="panel-header"><h3 class="panel-title">Your Profile</h3></div>
+                <div class="profile-widget">
+                    {% if request.user.profile_pic and request.user.profile_pic.name != 'profiles/default.png' %}
+                        <img src="{{ request.user.profile_pic.url }}">
+                    {% else %}
+                        <div class="avatar avatar-fallback" style="width:56px;height:56px;font-size:20px;">{{ request.user.username|first|upper }}</div>
+                    {% endif %}
+                    <div class="profile-widget-info">
+                        <h4>{{ request.user.full_name|default:request.user.username }}</h4>
+                        <p>@{{ request.user.username }}</p>
+                    </div>
+                    <a href="{% url 'profile' request.user.username %}" style="margin-left:auto; color:var(--text-muted);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>
+                </div>
+                <div class="profile-stats">
+                    <div class="stat-box"><h5>{{ total_friends|default:"0" }}</h5><p>Friends</p></div>
+                    <div class="stat-box"><h5>0</h5><p>Followers</p></div>
+                    <div class="stat-box"><h5>{{ request.user.post_set.count }}</h5><p>Posts</p></div>
+                </div>
+            </div>
+
+            <div class="panel-section glass">
+                <div class="panel-header">
+                    <h3 class="panel-title"><span style="color:#22c55e;font-size:12px;margin-right:6px;">●</span> Friends Online</h3>
+                    <a href="{% url 'friends' %}" class="panel-link">See all</a>
+                </div>
+                <div class="friends-row">
+                    {% for friend in friends_online %}
+                        <a href="{% url 'profile' friend.username %}" class="friend-online" title="{{ friend.full_name }}">
+                            {% if friend.profile_pic and friend.profile_pic.name != 'profiles/default.png' %}
+                                <img src="{{ friend.profile_pic.url }}">
+                            {% else %}
+                                <div class="avatar avatar-fallback" style="width:48px;height:48px;">{{ friend.username|first|upper }}</div>
+                            {% endif %}
+                            <div class="online-dot"></div>
+                        </a>
+                    {% empty %}
+                        <p style="font-size:13px; color:var(--text-muted);">No friends online.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="panel-section glass">
+                <div class="panel-header">
+                    <h3 class="panel-title">Friend Requests</h3>
+                    <a href="{% url 'friend_requests' %}" class="panel-link">See all</a>
+                </div>
+                {% for req in pending_requests %}
+                    <div class="req-item">
+                        {% if req.user.profile_pic and req.user.profile_pic.name != 'profiles/default.png' %}
+                            <img src="{{ req.user.profile_pic.url }}">
+                        {% else %}
+                            <div class="avatar avatar-fallback" style="width:44px;height:44px;">{{ req.user.username|first|upper }}</div>
+                        {% endif %}
+                        <div class="req-info">
+                            <h4>{{ req.user.full_name|default:req.user.username }}</h4>
+                            <p>Sent you a request</p>
+                            <div class="req-actions">
+                                <button
+                                    class="btn-accept js-friend-action"
+                                    data-url="{% url 'accept_friend_request' req.id %}"
+                                >Accept</button>
+                                <button
+                                    class="btn-reject js-friend-action"
+                                    data-url="{% url 'reject_friend_request' req.id %}"
+                                >Reject</button>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p style="font-size:13px; color:var(--text-muted);">No pending requests.</p>
+                {% endfor %}
+            </div>
+        </aside>
+        {% endif %}
+    </div>
+
+    <script src="{% static 'js/base.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

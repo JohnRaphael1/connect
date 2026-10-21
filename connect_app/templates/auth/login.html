@@ -1,0 +1,657 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log In · Connect</title>
+    <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --red: #e63946;
+            --red-light: #ff4d5a;
+            --red-glow: rgba(230, 57, 70, 0.35);
+            --bg: #f6f7fb;
+            --surface: rgba(255, 255, 255, 0.55);
+            --surface-strong: rgba(255, 255, 255, 0.8);
+            --border-glass: rgba(255, 255, 255, 0.7);
+            --border-solid: rgba(0, 0, 0, 0.06);
+            --text: #1f1f29;
+            --text-muted: #6b6b7b;
+            --input-bg: rgba(255, 255, 255, 0.75);
+            --input-border: rgba(0, 0, 0, 0.08);
+        }
+        [data-theme="dark"] {
+            --bg: #0a0a10;
+            --surface: rgba(25, 25, 35, 0.55);
+            --surface-strong: rgba(30, 30, 42, 0.8);
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --border-solid: rgba(255, 255, 255, 0.06);
+            --text: #f2f2f7;
+            --text-muted: #a0a0b0;
+            --input-bg: rgba(0, 0, 0, 0.35);
+            --input-border: rgba(255, 255, 255, 0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            overflow-x: hidden;
+            transition: background 0.4s, color 0.4s;
+        }
+
+        /* ============== LEFT PANEL — brand showcase ============== */
+        .brand-panel {
+            flex: 1.1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 30% 30%, rgba(230, 57, 70, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(230, 57, 70, 0.25) 0%, transparent 55%),
+                linear-gradient(135deg, #12060a 0%, #0a0a10 100%);
+            color: #fff;
+        }
+
+        /* Floating orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.55;
+            pointer-events: none;
+        }
+        .orb-1 {
+            width: 380px; height: 380px;
+            background: rgba(230, 57, 70, 0.7);
+            top: -100px; left: -100px;
+            animation: float1 12s ease-in-out infinite;
+        }
+        .orb-2 {
+            width: 300px; height: 300px;
+            background: rgba(255, 77, 90, 0.5);
+            bottom: -80px; right: -60px;
+            animation: float2 15s ease-in-out infinite;
+        }
+        @keyframes float1 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(40px, 50px); }
+        }
+        @keyframes float2 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-50px, -30px); }
+        }
+
+        .brand-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            animation: fadeUp 1s ease both;
+        }
+
+        .brand-logo {
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+            border-radius: 30%;
+            margin-bottom: 30px;
+            animation: spinSlow 20s linear infinite;
+            filter: drop-shadow(0 0 40px rgba(230, 57, 70, 0.7));
+        }
+        @keyframes spinSlow { to { transform: rotate(360deg); } }
+
+        .brand-title {
+            font-size: 64px;
+            font-weight: 900;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, #fff 0%, #ffd0d6 50%, #e63946 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+            margin-bottom: 16px;
+        }
+        .brand-subtitle {
+            font-size: 16px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.65);
+            font-weight: 500;
+        }
+        .brand-features {
+            margin-top: 60px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            max-width: 340px;
+        }
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            animation: fadeUp 0.8s ease both;
+        }
+        .feature:nth-child(1) { animation-delay: 0.3s; }
+        .feature:nth-child(2) { animation-delay: 0.5s; }
+        .feature:nth-child(3) { animation-delay: 0.7s; }
+        .feature-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--red), var(--red-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .feature span {
+            font-size: 14px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.85);
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ============== RIGHT PANEL — login form ============== */
+        .form-panel {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            position: relative;
+            background: var(--bg);
+            transition: background 0.4s;
+        }
+        .form-panel::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 70% 30%, var(--red-glow) 0%, transparent 60%);
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            padding: 40px 36px;
+            border-radius: 24px;
+            background: var(--surface);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border: 1px solid var(--border-glass);
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.08),
+                0 4px 16px rgba(230, 57, 70, 0.06);
+            animation: fadeUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+            position: relative;
+            z-index: 2;
+        }
+
+        .mobile-logo {
+            display: none;
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+            border-radius: 24%;
+            margin: 0 auto 20px;
+            animation: spinSlow 20s linear infinite;
+        }
+
+        .login-card h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+        .login-card .sub {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+        }
+
+        .field {
+            margin-bottom: 18px;
+            position: relative;
+        }
+        .field-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            letter-spacing: 0.3px;
+        }
+        .field-input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: 1px solid var(--input-border);
+            background: var(--input-bg);
+            color: var(--text);
+            font-size: 15px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+        .field-input:focus {
+            border-color: var(--red);
+            box-shadow: 0 0 0 4px rgba(230, 57, 70, 0.12);
+        }
+        .field-input.has-error {
+            border-color: #d92b3a;
+            box-shadow: 0 0 0 4px rgba(217, 43, 58, 0.12);
+        }
+
+        .pw-toggle {
+            position: absolute;
+            right: 14px;
+            bottom: 14px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .pw-toggle:hover { color: var(--red); }
+
+        .row-between {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+        .remember {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+        .remember input { accent-color: var(--red); }
+        .forgot { color: var(--red); font-weight: 500; text-decoration: none; }
+        .forgot:hover { text-decoration: underline; }
+
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            border-radius: 14px;
+            border: none;
+            background: linear-gradient(135deg, var(--red) 0%, var(--red-light) 100%);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(230, 57, 70, 0.35);
+            transition: transform 0.15s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-submit:hover { box-shadow: 0 12px 32px rgba(230, 57, 70, 0.5); }
+        .btn-submit:active { transform: scale(0.98); }
+        .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 24px 0;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-solid);
+        }
+
+        .signup-cta {
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+        .signup-cta a {
+            color: var(--red);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .signup-cta a:hover { text-decoration: underline; }
+
+        .error-banner {
+            padding: 12px 16px;
+            border-radius: 12px;
+            background: rgba(217, 43, 58, 0.12);
+            border: 1px solid rgba(217, 43, 58, 0.3);
+            color: #d92b3a;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 18px;
+            display: none;
+        }
+        .error-banner.show { display: block; animation: shake 0.4s; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+
+        /* Theme toggle — fixed top-right */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid var(--border-glass);
+            background: var(--surface);
+            backdrop-filter: blur(12px);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            transition: transform 0.15s, background 0.2s;
+        }
+        .theme-toggle:hover { transform: scale(1.08); }
+        .theme-toggle:active { transform: scale(0.94); }
+
+        /* ============== RESPONSIVE ============== */
+        @media (max-width: 900px) {
+            body { flex-direction: column; }
+            .brand-panel {
+                flex: none;
+                padding: 30px 20px;
+                min-height: 200px;
+            }
+            .brand-title { font-size: 40px; }
+            .brand-logo { width: 80px; height: 80px; margin-bottom: 16px; }
+            .brand-features { display: none; }
+            .form-panel { padding: 30px 20px; }
+        }
+        @media (max-width: 500px) {
+            .login-card { padding: 30px 24px; }
+            .mobile-logo { display: block; }
+            .brand-panel { display: none; }
+            .form-panel { min-height: 100vh; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Theme toggle -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <svg id="iconSun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <svg id="iconMoon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+    </button>
+
+    <!-- LEFT: brand showcase -->
+    <div class="brand-panel">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+
+        <div class="brand-content">
+            <img src="{% static 'images/logo.png' %}" alt="Connect" class="brand-logo">
+            <h1 class="brand-title">Connect</h1>
+            <p class="brand-subtitle">Let's Connect</p>
+
+            <div class="brand-features">
+                <div class="feature">
+                    <div class="feature-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </div>
+                    <span>Meet new friends around you</span>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                    </div>
+                    <span>Chat instantly with people you love</span>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        </svg>
+                    </div>
+                    <span>Stay updated on what matters</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: login form -->
+    <div class="form-panel">
+        <div class="login-card">
+            <img src="{% static 'images/logo.png' %}" alt="Connect" class="mobile-logo">
+
+            <h1>Welcome back</h1>
+            <p class="sub">Sign in to your Connect account</p>
+
+            <div class="error-banner" id="errorBanner"></div>
+
+            <form id="loginForm" method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="field">
+                    <label class="field-label" for="identifier">Username, Email or Phone</label>
+                    <input
+                        type="text"
+                        id="identifier"
+                        name="identifier"
+                        class="field-input"
+                        placeholder="Enter your credentials"
+                        autocomplete="username"
+                        required
+                    >
+                </div>
+
+                <div class="field">
+                    <label class="field-label" for="password">Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        class="field-input"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required
+                        style="padding-right: 46px;"
+                    >
+                    <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password">
+                        <svg id="eyeOpen" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        <svg id="eyeClosed" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                            <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="row-between">
+                    <label class="remember">
+                        <input type="checkbox" name="remember" checked>
+                        Remember me
+                    </label>
+                    <a href="#" class="forgot">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    Sign In
+                </button>
+            </form>
+
+            <div class="divider">or</div>
+
+            <p class="signup-cta">
+                New to Connect? <a href="{% url 'signup' %}">Create an account</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // ===== THEME TOGGLE =====
+        (function () {
+            const root = document.documentElement;
+            const btn = document.getElementById('themeToggle');
+            const sun = document.getElementById('iconSun');
+            const moon = document.getElementById('iconMoon');
+
+            function apply(theme) {
+                root.setAttribute('data-theme', theme);
+                sun.style.display = theme === 'dark' ? 'none' : 'block';
+                moon.style.display = theme === 'dark' ? 'block' : 'none';
+            }
+            apply(localStorage.getItem('connect-theme') || 'light');
+            btn.addEventListener('click', () => {
+                const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                apply(next);
+                localStorage.setItem('connect-theme', next);
+            });
+        })();
+
+        // ===== PASSWORD VISIBILITY =====
+        (function () {
+            const pw = document.getElementById('password');
+            const btn = document.getElementById('pwToggle');
+            const open = document.getElementById('eyeOpen');
+            const closed = document.getElementById('eyeClosed');
+            btn.addEventListener('click', () => {
+                const showing = pw.type === 'text';
+                pw.type = showing ? 'password' : 'text';
+                open.style.display = showing ? 'block' : 'none';
+                closed.style.display = showing ? 'none' : 'block';
+            });
+        })();
+
+        // ===== LOGIN FORM =====
+        (function () {
+            const form = document.getElementById('loginForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const errorBanner = document.getElementById('errorBanner');
+            const identifier = document.getElementById('identifier');
+            const password = document.getElementById('password');
+
+            function showError(msg) {
+                errorBanner.textContent = msg;
+                errorBanner.classList.remove('show');
+                // force reflow for re-triggering animation
+                void errorBanner.offsetWidth;
+                errorBanner.classList.add('show');
+            }
+            function clearError() {
+                errorBanner.classList.remove('show');
+                identifier.classList.remove('has-error');
+                password.classList.remove('has-error');
+            }
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                clearError();
+
+                const id = identifier.value.trim();
+                const pw = password.value;
+
+                if (!id) {
+                    identifier.classList.add('has-error');
+                    showError('Please enter your username, email, or phone.');
+                    identifier.focus();
+                    return;
+                }
+                if (!pw) {
+                    password.classList.add('has-error');
+                    showError('Please enter your password.');
+                    password.focus();
+                    return;
+                }
+
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner"></span> Signing in…';
+
+                try {
+                    const formData = new FormData(form);
+                    const res = await fetch(form.action || window.location.href, {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    });
+
+                    // If the response is a redirect to home (Django default), follow it
+                    if (res.redirected) {
+                        window.location.href = res.url;
+                        return;
+                    }
+
+                    // If it returned HTML (login failed), detect error
+                    const text = await res.text();
+                    if (text.includes('Invalid credentials') || res.status === 400) {
+                        showError('Invalid credentials. Please try again.');
+                        password.classList.add('has-error');
+                        password.value = '';
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Sign In';
+                        return;
+                    }
+
+                    // Fallback — submit natively
+                    form.submit();
+                } catch (err) {
+                    // Network error — fall back to normal form submit
+                    form.submit();
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
