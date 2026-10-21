@@ -14,7 +14,6 @@ from pathlib import Path
 import os
 import pymysql
 pymysql.install_as_MySQLdb()
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -47,7 +46,6 @@ INSTALLED_APPS = [
     'connect_app',
     'cloudinary_storage',
     'cloudinary',
-    'django.contrib.staticfiles',
 ]
 
 MIDDLEWARE = [
@@ -100,19 +98,22 @@ WSGI_APPLICATION = 'connect.wsgi.application'
 
 
 import os
-import dj_database_url
 
-# Check if we're on Vercel (or any production environment with DATABASE_URL set)
-if os.environ.get("DATABASE_URL"):
-    # Parse the environment variable (Format: mysql://user:pass@host:port/dbname)
+if os.environ.get("TIDB_HOST"):
     DATABASES = {
-        "default": dj_database_url.config(
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
+        "default": {
+            "ENGINE": "django_tidb",
+            "NAME": os.environ.get("TIDB_DB_NAME", "test"),
+            "USER": os.environ.get("TIDB_USER"),
+            "PASSWORD": os.environ.get("TIDB_PASSWORD"),
+            "HOST": os.environ.get("TIDB_HOST"),
+            "PORT": os.environ.get("TIDB_PORT", "4000"),
+            "OPTIONS": {
+                "ssl": {"ca": os.environ.get("TIDB_CA_PATH")},
+            },
+        }
     }
 else:
-    # Local development fallback (your current setup)
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.mysql",
@@ -123,8 +124,6 @@ else:
             "PORT": "3306",
         }
     }
-
-
 
 
 # Custom User Model (Crucial for Email/Phone login)
@@ -186,16 +185,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 
-import cloudinary
-import cloudinary.uploader
-import cloudinary.api
-
-# Cloudinary configuration (reads from environment variables)
-cloudinary.config(
-    cloud_name=os.environ.get("CLOUDINARY_CLOUD_NAME"),
-    api_key=os.environ.get("CLOUDINARY_API_KEY"),
-    api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
-)
 
 # Production uses Cloudinary, development uses local files
 if not DEBUG:
