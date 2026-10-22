@@ -222,15 +222,6 @@ else:
     STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
     MEDIA_URL = '/media/'
 
-# CORS (For when you build the mobile app)
-CORS_ALLOW_ALL_ORIGINS = True
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
 
 import cloudinary
 import cloudinary.uploader
@@ -242,6 +233,16 @@ cloudinary.config(
     api_secret=os.environ.get("CLOUDINARY_API_SECRET"),
     secure=True,
 )
+
+# CORS (For when you build the mobile app)
+CORS_ALLOW_ALL_ORIGINS = True
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
 
 
 # Production uses Cloudinary, development uses local files
