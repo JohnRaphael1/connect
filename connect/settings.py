@@ -214,13 +214,13 @@ else:
             "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
         },
         "staticfiles": {
-            "BACKEND": "cloudinary_storage.storage.StaticHashedCloudinaryStorage",
+            "BACKEND": "cloudinary_storage.storage.StaticCloudinaryStorage",
         },
     }
     STATIC_URL = '/static/'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
     MEDIA_URL = '/media/'
-
-
 
 # CORS (For when you build the mobile app)
 CORS_ALLOW_ALL_ORIGINS = True
