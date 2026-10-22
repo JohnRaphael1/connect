@@ -7,52 +7,27 @@
 <style>
     .edit-container { max-width: 700px; margin: 20px auto; padding: 0 16px; }
     .edit-card { padding: 30px; }
-
-    .edit-header {
-        display: flex; align-items: center; justify-content: space-between;
-        margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-solid);
-    }
+    .edit-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-solid); }
     .edit-header h1 { font-size: 22px; font-weight: 800; color: var(--text); }
     .btn-back { color: var(--text-muted); display: flex; align-items: center; gap: 6px; font-weight: 600; }
     .btn-back:hover { color: var(--text); }
 
-    /* Image Upload Previews */
-    .banner-upload-area {
-        position: relative; width: 100%; height: 160px; border-radius: 16px;
-        background: var(--input-bg); overflow: hidden; cursor: pointer;
-        border: 2px dashed var(--border-solid); display: flex; align-items: center; justify-content: center;
-        margin-bottom: 20px; transition: border-color 0.2s;
-    }
+    .banner-upload-area { position: relative; width: 100%; height: 160px; border-radius: 16px; background: var(--input-bg); overflow: hidden; cursor: pointer; border: 2px dashed var(--border-solid); display: flex; align-items: center; justify-content: center; margin-bottom: 20px; transition: border-color 0.2s; }
     .banner-upload-area:hover { border-color: var(--red); }
     .banner-upload-area img { width: 100%; height: 100%; object-fit: cover; }
-    .upload-label {
-        position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-        background: rgba(0,0,0,0.4); color: #fff; font-weight: 600; opacity: 0; transition: opacity 0.2s;
-    }
+    .upload-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.4); color: #fff; font-weight: 600; opacity: 0; transition: opacity 0.2s; }
     .banner-upload-area:hover .upload-label { opacity: 1; }
 
-    .avatar-upload-area {
-        position: relative; width: 110px; height: 110px; border-radius: 50%;
-        background: var(--input-bg); overflow: hidden; cursor: pointer;
-        border: 3px solid var(--surface-solid); box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        margin: -55px auto 20px; display: flex; align-items: center; justify-content: center;
-    }
+    .avatar-upload-area { position: relative; width: 110px; height: 110px; border-radius: 50%; background: var(--input-bg); overflow: hidden; cursor: pointer; border: 3px solid var(--surface-solid); box-shadow: 0 4px 15px rgba(0,0,0,0.2); margin: -55px auto 20px; display: flex; align-items: center; justify-content: center; }
     .avatar-upload-area img { width: 100%; height: 100%; object-fit: cover; }
     .avatar-upload-area .upload-label { border-radius: 50%; flex-direction: column; gap: 4px; font-size: 12px; }
 
-    /* Form Inputs */
     .form-group { margin-bottom: 20px; }
     .form-label { display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
-    .form-input, .form-select {
-        width: 100%; padding: 14px 16px; border-radius: 12px;
-        border: 1px solid var(--border-solid); background: var(--input-bg);
-        color: var(--text); font-size: 15px; outline: none; font-family: inherit;
-    }
+    .form-input, .form-select { width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border-solid); background: var(--input-bg); color: var(--text); font-size: 15px; outline: none; font-family: inherit; }
     .form-input:focus, .form-select:focus { border-color: var(--red); box-shadow: 0 0 0 3px rgba(230,57,70,0.15); }
-
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
-    /* Toggle Switch */
     .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; border-top: 1px solid var(--border-solid); border-bottom: 1px solid var(--border-solid); margin-bottom: 24px; }
     .toggle-info h4 { font-size: 15px; font-weight: 600; color: var(--text); }
     .toggle-info p { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
@@ -63,7 +38,6 @@
     .switch input:checked + .slider { background: var(--red); }
     .switch input:checked + .slider::before { transform: translateX(20px); }
 
-    /* Actions */
     .form-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; }
     .btn-save { background: var(--red); color: #fff; padding: 12px 32px; border-radius: 12px; font-weight: 700; font-size: 15px; box-shadow: 0 4px 15px rgba(230,57,70,0.3); }
     .btn-cancel { color: var(--text-muted); padding: 12px 20px; font-weight: 600; }
@@ -90,7 +64,6 @@
             </a>
         </div>
 
-        <!-- Banner Upload -->
         <label class="banner-upload-area">
             {% if request.user.banner and request.user.banner.name != 'banners/default.png' %}
                 <img id="bannerPreview" src="{{ request.user.banner.url }}">
@@ -101,7 +74,6 @@
             <input type="file" name="banner" id="bannerInput" accept="image/*" hidden>
         </label>
 
-        <!-- Avatar Upload -->
         <label class="avatar-upload-area">
             {% if request.user.profile_pic and request.user.profile_pic.name != 'profiles/default.png' %}
                 <img id="avatarPreview" src="{{ request.user.profile_pic.url }}">
@@ -117,7 +89,6 @@
             <input type="file" name="profile_pic" id="avatarInput" accept="image/*" hidden>
         </label>
 
-        <!-- Form Fields -->
         <div class="form-group">
             <label class="form-label">Full Name</label>
             <input type="text" name="full_name" class="form-input" value="{{ request.user.full_name|default:'' }}" required>
@@ -149,7 +120,6 @@
             </div>
         </div>
 
-        <!-- Privacy Toggle -->
         <div class="toggle-row">
             <div class="toggle-info">
                 <h4>Private Account</h4>
@@ -171,22 +141,32 @@
 
 {% block extra_js %}
 <script>
-    // Preview Banner
-    document.getElementById('bannerInput').addEventListener('change', function(e) {
+    document.getElementById('bannerInput').addEventListener('change', async function(e) {
         if (e.target.files && e.target.files[0]) {
+            const compressed = await window.Connect.compressImage(e.target.files[0], 1200, 600, 0.8);
+            
+            const dt = new DataTransfer();
+            dt.items.add(compressed);
+            e.target.files = dt.files;
+
             const reader = new FileReader();
             reader.onload = function(ev) {
                 const img = document.getElementById('bannerPreview');
                 img.src = ev.target.result;
                 img.style.display = 'block';
             }
-            reader.readAsDataURL(e.target.files[0]);
+            reader.readAsDataURL(compressed);
         }
     });
 
-    // Preview Avatar
-    document.getElementById('avatarInput').addEventListener('change', function(e) {
+    document.getElementById('avatarInput').addEventListener('change', async function(e) {
         if (e.target.files && e.target.files[0]) {
+            const compressed = await window.Connect.compressImage(e.target.files[0], 500, 500, 0.85);
+            
+            const dt = new DataTransfer();
+            dt.items.add(compressed);
+            e.target.files = dt.files;
+
             const reader = new FileReader();
             reader.onload = function(ev) {
                 const img = document.getElementById('avatarPreview');
@@ -194,7 +174,7 @@
                 img.style.display = 'block';
                 document.getElementById('avatarFallback').style.display = 'none';
             }
-            reader.readAsDataURL(e.target.files[0]);
+            reader.readAsDataURL(compressed);
         }
     });
 </script>

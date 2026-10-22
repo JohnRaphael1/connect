@@ -5,88 +5,25 @@
 
 {% block extra_css %}
 <style>
-    .add-post-container {
-        max-width: 600px;
-        margin: 40px auto;
-        padding: 0 16px;
-    }
-    .add-post-card {
-        padding: 30px;
-    }
-    .add-post-header {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        margin-bottom: 24px;
-    }
-    .add-post-header img, .add-post-header .avatar {
-        width: 56px; height: 56px; border-radius: 50%; object-fit: cover;
-    }
-    .add-post-header h2 {
-        font-size: 20px; font-weight: 800; color: var(--text);
-    }
-    .add-post-textarea {
-        width: 100%;
-        background: transparent;
-        border: none;
-        color: var(--text);
-        font-size: 18px;
-        font-family: inherit;
-        resize: none;
-        outline: none;
-        min-height: 150px;
-        line-height: 1.5;
-    }
+    .add-post-container { max-width: 600px; margin: 40px auto; padding: 0 16px; }
+    .add-post-card { padding: 30px; }
+    .add-post-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+    .add-post-header img, .add-post-header .avatar { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; }
+    .add-post-header h2 { font-size: 20px; font-weight: 800; color: var(--text); }
+    .add-post-textarea { width: 100%; background: transparent; border: none; color: var(--text); font-size: 18px; font-family: inherit; resize: none; outline: none; min-height: 150px; line-height: 1.5; }
     .add-post-textarea::placeholder { color: var(--text-muted); }
     
-    .media-preview-area {
-        margin-top: 20px;
-        position: relative;
-        border-radius: 16px;
-        overflow: hidden;
-        background: var(--input-bg);
-        display: none;
-    }
+    .media-preview-area { margin-top: 20px; position: relative; border-radius: 16px; overflow: hidden; background: var(--input-bg); display: none; }
     .media-preview-area.has-media { display: block; }
-    .media-preview-area img, .media-preview-area video {
-        width: 100%; max-height: 400px; object-fit: contain; background: #000;
-    }
-    .remove-media-btn {
-        position: absolute; top: 10px; right: 10px;
-        background: rgba(0,0,0,0.6); color: #fff;
-        width: 36px; height: 36px; border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 20px; backdrop-filter: blur(4px);
-    }
+    .media-preview-area img, .media-preview-area video { width: 100%; max-height: 400px; object-fit: contain; background: #000; }
+    .remove-media-btn { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); color: #fff; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; backdrop-filter: blur(4px); }
 
-    .add-post-actions {
-        margin-top: 24px;
-        padding-top: 20px;
-        border-top: 1px solid var(--border-solid);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-    .add-post-tools {
-        display: flex; gap: 12px;
-    }
-    .add-tool-btn {
-        display: flex; align-items: center; gap: 8px;
-        padding: 10px 16px; border-radius: 12px;
-        background: var(--input-bg); color: var(--text-muted);
-        font-weight: 600; font-size: 14px; cursor: pointer;
-        transition: background 0.2s, color 0.2s;
-    }
+    .add-post-actions { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-solid); display: flex; align-items: center; justify-content: space-between; }
+    .add-post-tools { display: flex; gap: 12px; }
+    .add-tool-btn { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 12px; background: var(--input-bg); color: var(--text-muted); font-weight: 600; font-size: 14px; cursor: pointer; transition: background 0.2s, color 0.2s; }
     .add-tool-btn:hover { background: var(--border-solid); color: var(--red); }
     .add-tool-btn svg { width: 20px; height: 20px; }
-
-    .btn-submit-post {
-        background: var(--red); color: #fff;
-        padding: 12px 32px; border-radius: 999px;
-        font-weight: 700; font-size: 16px;
-        box-shadow: 0 4px 15px rgba(230,57,70,0.4);
-        transition: transform 0.15s;
-    }
+    .btn-submit-post { background: var(--red); color: #fff; padding: 12px 32px; border-radius: 999px; font-weight: 700; font-size: 16px; box-shadow: 0 4px 15px rgba(230,57,70,0.4); transition: transform 0.15s; }
     .btn-submit-post:active { transform: scale(0.96); }
     .btn-submit-post:disabled { opacity: 0.5; cursor: not-allowed; }
 
@@ -96,7 +33,7 @@
         .add-post-header img, .add-post-header .avatar { width: 48px; height: 48px; }
         .add-post-actions { flex-direction: column; gap: 16px; align-items: stretch; }
         .add-post-tools { justify-content: space-between; }
-        .add-tool-btn span { display: none; } /* Hide text on mobile, show icon only */
+        .add-tool-btn span { display: none; }
         .btn-submit-post { width: 100%; }
     }
 </style>
@@ -106,7 +43,6 @@
 <div class="add-post-container">
     <form method="POST" enctype="multipart/form-data" class="glass add-post-card" id="addPostForm">
         {% csrf_token %}
-        
         <div class="add-post-header">
             {% if user.profile_pic and user.profile_pic.name != 'profiles/default.png' %}
                 <img src="{{ user.profile_pic.url }}">
@@ -121,13 +57,11 @@
 
         <textarea name="text" id="postText" class="add-post-textarea" placeholder="What's on your mind, {{ user.full_name|default:user.username }}?" rows="5"></textarea>
 
-        <!-- Media Preview -->
         <div class="media-preview-area" id="previewArea">
             <div id="previewContent"></div>
             <button type="button" class="remove-media-btn" id="removeMediaBtn">&times;</button>
         </div>
 
-        <!-- Hidden Inputs -->
         <input type="file" id="imageInput" name="image" accept="image/*" hidden>
         <input type="file" id="videoInput" name="video" accept="video/*" hidden>
 
@@ -160,14 +94,12 @@
     const submitBtn = document.getElementById('submitBtn');
 
     function updateSubmitBtn() {
-        // Enable if there is text OR a file selected
         const hasText = textArea.value.trim().length > 0;
         const hasFile = imageInput.files.length > 0 || videoInput.files.length > 0;
         submitBtn.disabled = !(hasText || hasFile);
     }
 
     textArea.addEventListener('input', updateSubmitBtn);
-
     document.getElementById('selectImageBtn').onclick = () => { videoInput.value = ''; imageInput.click(); };
     document.getElementById('selectVideoBtn').onclick = () => { imageInput.value = ''; videoInput.click(); };
 
@@ -175,33 +107,33 @@
         if (!file) return;
         const url = URL.createObjectURL(file);
         previewContent.innerHTML = '';
-        if (type === 'image') {
-            previewContent.innerHTML = `<img src="${url}">`;
-        } else {
-            previewContent.innerHTML = `<video src="${url}" controls></video>`;
-        }
+        if (type === 'image') previewContent.innerHTML = `<img src="${url}">`;
+        else previewContent.innerHTML = `<video src="${url}" controls></video>`;
         previewArea.classList.add('has-media');
         updateSubmitBtn();
     }
 
-    imageInput.addEventListener('change', e => {
-        if (e.target.files[0]) showPreview(e.target.files[0], 'image');
-    });
-    videoInput.addEventListener('change', e => {
-        if (e.target.files[0]) showPreview(e.target.files[0], 'video');
-    });
+    imageInput.addEventListener('change', e => { if (e.target.files[0]) showPreview(e.target.files[0], 'image'); });
+    videoInput.addEventListener('change', e => { if (e.target.files[0]) showPreview(e.target.files[0], 'video'); });
+    removeMediaBtn.onclick = () => { imageInput.value = ''; videoInput.value = ''; previewContent.innerHTML = ''; previewArea.classList.remove('has-media'); updateSubmitBtn(); };
 
-    removeMediaBtn.onclick = () => {
-        imageInput.value = '';
-        videoInput.value = '';
-        previewContent.innerHTML = '';
-        previewArea.classList.remove('has-media');
-        updateSubmitBtn();
-    };
-
-    form.addEventListener('submit', () => {
+    form.addEventListener('submit', async (e) => {
         submitBtn.textContent = 'Posting...';
         submitBtn.disabled = true;
+
+        // Compress image before submission
+        if (imageInput.files[0]) {
+            e.preventDefault(); // Stop default submission to compress first
+            try {
+                const compressed = await window.Connect.compressImage(imageInput.files[0]);
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(compressed);
+                imageInput.files = dataTransfer.files;
+            } catch(err) {
+                console.error("Compression failed", err);
+            }
+            form.submit(); // Submit after compression
+        }
     });
 </script>
 {% endblock %}

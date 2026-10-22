@@ -618,12 +618,17 @@
 
     // ---- Attachments ----
     document.getElementById('attachBtn').addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', async e => {
-        const f = e.target.files[0];
+        fileInput.addEventListener('change', async e => {
+        let f = e.target.files[0];
         if (!f) return;
         let type = 'document';
-        if (f.type.startsWith('image/')) type = 'image';
-        else if (f.type.startsWith('video/')) type = 'video';
+        if (f.type.startsWith('image/')) {
+            type = 'image';
+            f = await window.Connect.compressImage(f); // Compress image before sending
+        }
+        else if (f.type.startsWith('video/')) {
+            type = 'video';
+        }
         await sendMessage('', type, f);
         fileInput.value = '';
     });
